@@ -1,0 +1,36 @@
+name: candy-fight api - ci
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+env:
+  CI: true
+  TZ: Europe/Paris
+  GO_VERSION: 1.16.4
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - run: |
+          gofmt -s -w **/*.go
+      - run: |
+          export PATH=$PATH:`go env GOPATH`/bin
+          go get -u honnef.co/go/tools/cmd/staticcheck
+          staticcheck ./...
