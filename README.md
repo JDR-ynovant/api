@@ -1,5 +1,8 @@
 # Candy Fight API
 
+[![candy-fight api - ci](https://github.com/JDR-ynovant/api/actions/workflows/ci.yml/badge.svg)](https://github.com/JDR-ynovant/api/actions/workflows/ci.yml)
+[![candy-fight api - cd](https://github.com/JDR-ynovant/api/actions/workflows/cd.yml/badge.svg)](https://github.com/JDR-ynovant/api/actions/workflows/cd.yml)
+
 ---
 
 The application is written in `go` using [Fiber]() and [mongo-driver]()
