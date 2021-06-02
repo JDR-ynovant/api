@@ -6,11 +6,16 @@ require (
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751 // indirect
 	github.com/andybalholm/brotli v1.0.3 // indirect
 	github.com/arsmn/fiber-swagger/v2 v2.6.0 // indirect
+	github.com/cosmtrek/air v1.27.3 // indirect
+	github.com/creack/pty v1.1.13 // indirect
+	github.com/fatih/color v1.12.0 // indirect
 	github.com/go-openapi/spec v0.20.3 // indirect
 	github.com/go-openapi/swag v0.19.15 // indirect
 	github.com/gofiber/fiber/v2 v2.11.0 // indirect
 	github.com/klauspost/compress v1.12.3 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
+	github.com/mattn/go-isatty v0.0.13 // indirect
+	github.com/pelletier/go-toml v1.9.1 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/spf13/cobra v1.1.3 // indirect
 	github.com/swaggo/swag v1.7.0 // indirect

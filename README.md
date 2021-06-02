@@ -5,7 +5,14 @@
 
 ---
 
-The application is written in `go` using [Fiber]() and [mongo-driver]()
+The application is written in `go` using [fiber](https://github.com/gofiber/fiber) and [mongo-driver](https://github.com/mongodb/mongo-go-driver)
+
+## Development
+For convenience, we use `air` to enable hot reload of the app. Install air, then just run it.
+```bash
+go get -u github.com/cosmtrek/air
+air
+```
 
 ## Run the application
 

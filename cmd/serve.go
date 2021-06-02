@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	_ "github.com/JDR-ynovant/api/docs"
 	"github.com/JDR-ynovant/api/internal/routes"
 	swagger "github.com/arsmn/fiber-swagger/v2"
@@ -18,8 +19,6 @@ import (
 // @BasePath /
 func executeServeCommand() {
 	handlers := []routes.RouteHandler{routes.UserRouteHandler{}}
-
-	log.Println("Serving candy-fight API...")
 	app := fiber.New()
 
 	app.Get("/swagger/*", swagger.Handler)
@@ -28,6 +27,7 @@ func executeServeCommand() {
 		handler.Register(app)
 	}
 
+	log.Println(fmt.Sprintf("Serving candy-fight API : http://localhost:3000"))
 	app.Listen(":3000")
 }
 

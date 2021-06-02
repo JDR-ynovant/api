@@ -3,6 +3,7 @@ package routes
 import (
 	"context"
 	"encoding/json"
+	"github.com/JDR-ynovant/api/internal/models"
 	"github.com/JDR-ynovant/api/internal/repository"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
@@ -13,11 +14,14 @@ import (
 type UserRouteHandler struct{}
 
 func (UserRouteHandler) Register(app *fiber.App) {
-	app.Get("/users/:id?", getUser)
-	app.Post("/users", createUser)
-	app.Put("/users/:id", updateUser)
-	app.Delete("/users/:id", deleteUser)
-	log.Println("Registered users endpoint routes.")
+	usersApi := app.Group("/users")
+
+	usersApi.Get("/:id?", getUser)
+	usersApi.Post("", createUser)
+	usersApi.Put("/:id", updateUser)
+	usersApi.Delete("/:id", deleteUser)
+
+	log.Println("Registered users api group.")
 }
 
 // getUser godoc
@@ -74,13 +78,49 @@ func getUser(c *fiber.Ctx) error {
 // @Success 200 {object} models.User
 // @Router /users [post]
 func createUser(c *fiber.Ctx) error {
-	return nil
+	collection, err := repository.GetMongoDbCollection("users")
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	var person models.User
+	json.Unmarshal([]byte(c.Body()), &person)
+
+	res, err := collection.InsertOne(context.Background(), person)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	response, _ := json.Marshal(res)
+	return c.JSON(response)
 }
 
+// updateUser godoc
+// @Summary Update an existing user
+// @Description Update an existing user
+// @Tags users
+// @Accept json
+// @Produce json
+// @Success 200 {object} models.User
+// @Param id path int true "User ID"
+// @Router /users/{id} [put]
 func updateUser(c *fiber.Ctx) error {
 	return nil
 }
 
+// deleteUser godoc
+// @Summary Delete an existing user
+// @Description Delete an existing user
+// @Tags users
+// @Accept json
+// @Produce json
+// @Success 200 {object} models.User
+// @Param id path int true "User ID"
+// @Router /users/{id} [delete]
 func deleteUser(c *fiber.Ctx) error {
 	return nil
 }

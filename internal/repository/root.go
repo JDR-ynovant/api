@@ -32,7 +32,7 @@ func GetMongoConnection() *mongo.Client {
 func getMongoConnection() (*mongo.Client, error) {
 	config := internal.GetConfig()
 	ctx := context.Background()
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(fmt.Sprintf("mongodb://%s:%d", config.DbHost, config.DbPort)))
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(fmt.Sprintf("mongodb://candy-fight:candy-fight@%s:%d", config.DbHost, config.DbPort)))
 
 	if err != nil {
 		log.Fatal(err)
@@ -49,11 +49,7 @@ func getMongoConnection() (*mongo.Client, error) {
 
 func GetMongoDbCollection(CollectionName string) (*mongo.Collection, error) {
 	config := internal.GetConfig()
-	client, err := getMongoConnection()
-
-	if err != nil {
-		return nil, err
-	}
+	client := GetMongoConnection()
 
 	collection := client.Database(config.DbName).Collection(CollectionName)
 
