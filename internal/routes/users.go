@@ -7,6 +7,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"log"
 )
 
 type UserRouteHandler struct{}
@@ -16,13 +17,23 @@ func (UserRouteHandler) Register(app *fiber.App) {
 	app.Post("/users", createUser)
 	app.Put("/users/:id", updateUser)
 	app.Delete("/users/:id", deleteUser)
+	log.Println("Registered users endpoint routes.")
 }
 
+// getUser godoc
+// @Summary Show a user
+// @Description get string by ID
+// @Tags users
+// @Accept  json
+// @Produce  json
+// @Param id path int true "User ID"
+// @Success 200 {object} models.User
+// @Router /users/{id} [get]
 func getUser(c *fiber.Ctx) error {
 	collection, err := repository.GetMongoDbCollection("users")
 	if err != nil {
 		c.Status(500).Send([]byte(err.Error()))
-		return nil
+		return err
 	}
 
 	var filter bson.M = bson.M{}
@@ -39,7 +50,7 @@ func getUser(c *fiber.Ctx) error {
 
 	if err != nil {
 		c.Status(500).Send([]byte(err.Error()))
-		return nil
+		return err
 	}
 
 	cur.All(context.Background(), &results)
@@ -54,6 +65,14 @@ func getUser(c *fiber.Ctx) error {
 	return nil
 }
 
+// createUser godoc
+// @Summary Create a new user
+// @Description Create a new user
+// @Tags users
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} models.User
+// @Router /users [post]
 func createUser(c *fiber.Ctx) error {
 	return nil
 }

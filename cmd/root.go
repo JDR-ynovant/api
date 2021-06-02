@@ -2,12 +2,14 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/JDR-ynovant/api/internal"
 	"github.com/spf13/cobra"
+	"log"
 	"os"
 )
 
 func executeRootCommand() {
-	fmt.Println("Empty.")
+	log.Println("Empty.")
 }
 
 var rootCmd = &cobra.Command{
@@ -23,6 +25,7 @@ func init() {
 }
 
 func Execute() {
+	internal.InitConfig()
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)

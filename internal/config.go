@@ -10,9 +10,17 @@ type Configuration struct {
 var config Configuration
 
 func GetConfig() Configuration {
+	if config == (Configuration{}) {
+		InitConfig()
+	}
+
 	return config
 }
 
 func InitConfig() {
-	config = Configuration{}
+	config = Configuration{
+		DbHost: "localhost",
+		DbPort: 27017,
+		DbName: "candy-fight",
+	}
 }
