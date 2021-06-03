@@ -1,6 +1,6 @@
 package repository
 
-type UserRepository struct{
+type UserRepository struct {
 	tableName string
 }
 
@@ -13,4 +13,3 @@ func NewUserRepository() UserRepository {
 func (UserRepository) FindById(id string) interface{} {
 	panic("implement me")
 }
-

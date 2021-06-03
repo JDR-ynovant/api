@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	_ "github.com/JDR-ynovant/api/docs"
 	"github.com/JDR-ynovant/api/internal/repository"
 	"github.com/JDR-ynovant/api/internal/routes"
@@ -30,7 +29,7 @@ func executeServeCommand() {
 
 	defer repository.CloseConnection()
 
-	log.Println(fmt.Sprintf("Serving candy-fight API : http://localhost:3000"))
+	log.Println("Serving candy-fight API : http://localhost:3000")
 	log.Fatal(app.Listen(":3000"))
 }
 

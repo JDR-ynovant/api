@@ -1,4 +1,3 @@
-
 package internal
 
 type Configuration struct {
