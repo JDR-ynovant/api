@@ -65,3 +65,20 @@ jobs:
         run: |
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+  rollout:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: install kubectl
+        uses: azure/setup-kubectl@v1
+
+      - name: write kubeconfig
+        uses: DamianReeves/write-file-action@v1.0
+        with:
+          path: /tmp/kubeconfig
+          contents: ${{ secrets.K8S_CONFIG }}
+          write-mode: overwrite
+
+      - name: rollout deployments
+        run: kubectl -n candy-fight rollout restart deployments candy-fight-api-dp --kubeconfig="/tmp/kubeconfig"

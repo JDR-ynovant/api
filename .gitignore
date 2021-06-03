@@ -1,2 +1,5 @@
 docs/
 tmp/
+
+.env
+.env.*
