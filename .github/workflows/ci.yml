@@ -30,10 +30,11 @@ jobs:
             ${{ runner.os }}-go-
 
       - run: |
-          gofmt -s -w **/*.go
+          export PATH=$PATH:`go env GOPATH`/bin
+          go get -u github.com/go-openapi/swag
+          go get -u honnef.co/go/tools/cmd/staticcheck
 
       - run: |
-          export PATH=$PATH:`go env GOPATH`/bin
           swag init
-          go get -u honnef.co/go/tools/cmd/staticcheck
+          gofmt -s -w **/*.go
           staticcheck ./...
