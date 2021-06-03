@@ -33,8 +33,6 @@ jobs:
           export PATH=$PATH:`go env GOPATH`/bin
           go get -u github.com/go-openapi/swag
           go get -u honnef.co/go/tools/cmd/staticcheck
-
-      - run: |
           swag init
           gofmt -s -w **/*.go
           staticcheck ./...
