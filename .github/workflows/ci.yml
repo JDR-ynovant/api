@@ -31,10 +31,10 @@ jobs:
 
       - name: setup go env
         run: |
-          export PATH=$PATH:`go env GOPATH`/bin
-          go get -u github.com/go-openapi/swag
-          go build -o `go env GOPATH`/bin/swag `go env GOPATH`/src/github.com/go-openapi/swag
-          go get -u honnef.co/go/tools/cmd/staticcheck
+          export PATH=$PATH:`go env GOPATH`/bin && \
+          go get -u github.com/go-openapi/swag && \
+          go get -u honnef.co/go/tools/cmd/staticcheck && \
+          ls `go env GOPATH`/bin && which swag
 
       - run: |
           swag init
