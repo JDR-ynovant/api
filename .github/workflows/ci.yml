@@ -2,7 +2,7 @@ name: candy-fight api - ci
 
 on:
   push:
-    branches: [master]
+    branches: [main]
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
 
@@ -28,8 +28,10 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
+
       - run: |
           gofmt -s -w **/*.go
+
       - run: |
           export PATH=$PATH:`go env GOPATH`/bin
           go get -u honnef.co/go/tools/cmd/staticcheck

@@ -29,6 +29,10 @@ func GetMongoConnection() *mongo.Client {
 	return connection
 }
 
+func CloseConnection() {
+	_ = connection.Disconnect(context.Background())
+}
+
 func getMongoConnection() (*mongo.Client, error) {
 	config := internal.GetConfig()
 	ctx := context.Background()
