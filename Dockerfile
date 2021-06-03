@@ -3,7 +3,7 @@ FROM golang:1.16-alpine as build
 WORKDIR /srv/app
 COPY . .
 
-RUN make build
+RUN apk add make && make build
 
 FROM alpine:3
 LABEL "org.opencontainers.image.source"="https://github.com/JDR-ynovant/api"
