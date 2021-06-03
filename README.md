@@ -21,9 +21,7 @@ To build the API Server from source, `Golang >= 1.16` required.
 ```bash
 git clone https://github.com/JDR-ynovant/api.git
 
-go mod download
-go build -o candy-fight main.go
-chmod +x candy-fight
+make build
 
 candy-fight serve
 ```
