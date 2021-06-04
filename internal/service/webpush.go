@@ -7,6 +7,7 @@ import (
 	"github.com/SherClockHolmes/webpush-go"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"io"
 	"log"
 	"net/http"
 )
@@ -47,6 +48,11 @@ func SendNotification(subscription *webpush.Subscription) (*http.Response, error
 		TTL:             30,
 	})
 
-	defer resp.Body.Close()
+	if err == nil {
+		defer func(Body io.ReadCloser) {
+			_ = Body.Close()
+		}(resp.Body)
+	}
+
 	return resp, err
 }

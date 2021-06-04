@@ -1,7 +1,7 @@
 package auth
 
 import (
-"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2"
 )
 
 // New creates a new middleware handler

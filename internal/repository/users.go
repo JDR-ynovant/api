@@ -26,7 +26,7 @@ func NewUserRepository() UserRepository {
 
 	return UserRepository{
 		CollectionName: collectionName,
-		Collection: c,
+		Collection:     c,
 	}
 }
 

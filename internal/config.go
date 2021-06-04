@@ -8,12 +8,12 @@ import (
 )
 
 type Configuration struct {
-	DbHost string
-	DbPort int
-	DbName string
-	DbUser string
-	DbPass string
-	VapidPublicKey string
+	DbHost          string
+	DbPort          int
+	DbName          string
+	DbUser          string
+	DbPass          string
+	VapidPublicKey  string
 	VapidPrivateKey string
 }
 
@@ -33,12 +33,12 @@ func InitConfig() {
 	dbPort, _ := strconv.Atoi(getEnv("DB_PORT", "27017"))
 
 	config = Configuration{
-		DbHost: getEnv("DB_HOST", "localhost"),
-		DbPort: dbPort,
-		DbName: getEnv("DB_NAME", "candy-fight"),
-		DbUser: getEnv("DB_USER", "candy-fight"),
-		DbPass: getEnv("DB_PASS", "candy-fight"),
-		VapidPublicKey: getEnv("VAPID_PUBLIC_KEY", ""),
+		DbHost:          getEnv("DB_HOST", "localhost"),
+		DbPort:          dbPort,
+		DbName:          getEnv("DB_NAME", "candy-fight"),
+		DbUser:          getEnv("DB_USER", "candy-fight"),
+		DbPass:          getEnv("DB_PASS", "candy-fight"),
+		VapidPublicKey:  getEnv("VAPID_PUBLIC_KEY", ""),
 		VapidPrivateKey: getEnv("VAPID_PRIVATE_KEY", ""),
 	}
 }
