@@ -46,6 +46,19 @@ func (ur UserRepository) FindAll() ([]models.User, error) {
 	return results, err
 }
 
+func (ur UserRepository) FindAllBy(filter bson.M) ([]models.User, error) {
+	var fetchedUser []models.User
+
+	cur, err := ur.Collection.Find(context.Background(), filter)
+	if err != nil {
+		return nil, err
+	}
+
+	cur.All(context.Background(), &fetchedUser)
+
+	return fetchedUser, nil
+}
+
 func (ur UserRepository) FindOneById(id string) (*models.User, error) {
 	if ur.Collection == nil {
 		return nil, errors.New("missing connection")

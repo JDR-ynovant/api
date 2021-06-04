@@ -13,6 +13,8 @@ type Configuration struct {
 	DbName string
 	DbUser string
 	DbPass string
+	VapidPublicKey string
+	VapidPrivateKey string
 }
 
 var config Configuration
@@ -36,6 +38,8 @@ func InitConfig() {
 		DbName: getEnv("DB_NAME", "candy-fight"),
 		DbUser: getEnv("DB_USER", "candy-fight"),
 		DbPass: getEnv("DB_PASS", "candy-fight"),
+		VapidPublicKey: getEnv("VAPID_PUBLIC_KEY", ""),
+		VapidPrivateKey: getEnv("VAPID_PRIVATE_KEY", ""),
 	}
 }
 
