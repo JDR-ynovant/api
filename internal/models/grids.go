@@ -8,3 +8,7 @@ type Grid struct {
 	Height int                `json:"height,omitempty"`
 	Cells  []Cell             `json:"cells,omitempty"`
 }
+
+func (g Grid) CellAtCoordinates(x int, y int) *Cell {
+	return nil
+}

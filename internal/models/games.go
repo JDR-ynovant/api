@@ -9,10 +9,12 @@ type Game struct {
 	Id             primitive.ObjectID `bson:"_id" json:"id,omitempty"`
 	Name           string             `json:"name,omitempty"`
 	Players        []Character        `json:"players,omitempty"`
+	PlayerCount    int                `json:"playerCount,omitempty"`
 	Playing        primitive.ObjectID `json:"playing,omitempty"`
 	Owner          primitive.ObjectID `json:"owner,omitempty"`
 	Status         GameStatus         `json:"status,omitempty"`
 	Grid           Grid               `json:"grid,omitempty"`
+	Objects        []Object           `json:"objects,omitempty"`
 	ExpiryDate     time.Time          `json:"expiryDate,omitempty"`
 	Turns          []Turn             `json:"turns,omitempty"`
 	TurnNumber     int                `json:"turnNumber,omitempty"`

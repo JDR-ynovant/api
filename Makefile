@@ -12,3 +12,6 @@ clean:
 setup:
 	go install honnef.co/go/tools/cmd/staticcheck github.com/swaggo/swag/cmd/swag
 	git config core.hooksPath .githooks
+
+test:
+	go test -v ./...
