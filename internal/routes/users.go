@@ -13,7 +13,7 @@ import (
 
 type UserRouteHandler struct{}
 
-func (UserRouteHandler) Register(app *fiber.App) {
+func (UserRouteHandler) Register(app fiber.Router) {
 	usersApi := app.Group("/users")
 
 	usersApi.Get("/:id?", getUser)

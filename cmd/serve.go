@@ -21,10 +21,11 @@ func executeServeCommand() {
 	handlers := []routes.RouteHandler{routes.UserRouteHandler{}}
 	app := fiber.New()
 
-	app.Get("/swagger/*", swagger.Handler)
+	api := app.Group("/api")
+	api.Get("/swagger/*", swagger.Handler)
 
 	for _, handler := range handlers {
-		handler.Register(app)
+		handler.Register(api)
 	}
 
 	defer repository.CloseConnection()
