@@ -1,7 +1,5 @@
 #!/bin/bash
 
-echo "Linting files.."
-
 ## this will retrieve all of the .go files that have been 
 ## changed since the last commit
 STAGED_GO_FILES=$(git diff --cached --name-only -- '*.go')
@@ -11,6 +9,7 @@ if [[ $STAGED_GO_FILES == "" ]]; then
     echo "No Go Files to Update"
 ## otherwise we can do stuff with these changed go files
 else
+    echo "Linting files.."
     for file in $STAGED_GO_FILES; do
         ## format our file
         go fmt $file
@@ -19,7 +18,7 @@ else
         git add $file
     done
     echo "Done. ✓"
-fi
 
-echo "Static Check.."
-staticcheck ./...
+    echo "Static Check.."
+    staticcheck ./...
+fi
