@@ -1,13 +1,10 @@
 package routes
 
 import (
-	"context"
 	"encoding/json"
 	"github.com/JDR-ynovant/api/internal/models"
 	"github.com/JDR-ynovant/api/internal/repository"
 	"github.com/gofiber/fiber/v2"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"log"
 )
 
@@ -34,38 +31,31 @@ func (UserRouteHandler) Register(app fiber.Router) {
 // @Success 200 {object} models.User
 // @Router /users/{id} [get]
 func getUser(c *fiber.Ctx) error {
-	collection, err := repository.GetMongoDbCollection("users")
+	ur := repository.NewUserRepository()
+
+	if c.Params("id") == "" {
+		users, err := ur.FindAll()
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"message": err.Error(),
+			})
+		}
+
+		return c.JSON(users)
+	}
+
+	user, err := ur.FindOneById(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message": err.Error(),
 		})
 	}
 
-	var filter bson.M = bson.M{}
-
-	if c.Params("id") != "" {
-		id := c.Params("id")
-		objID, _ := primitive.ObjectIDFromHex(id)
-		filter = bson.M{"Id": objID}
-	}
-
-	var results []bson.M
-	cur, err := collection.Find(context.Background(), filter)
-
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": err.Error(),
-		})
-	}
-
-	cur.All(context.Background(), &results)
-	cur.Close(context.Background())
-
-	if results == nil {
+	if user == nil {
 		return c.SendStatus(fiber.StatusNotFound)
 	}
 
-	return c.JSON(results)
+	return c.JSON(user)
 }
 
 // createUser godoc
@@ -77,24 +67,19 @@ func getUser(c *fiber.Ctx) error {
 // @Success 200 {object} models.User
 // @Router /users [post]
 func createUser(c *fiber.Ctx) error {
-	collection, err := repository.GetMongoDbCollection("users")
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": err.Error(),
-		})
-	}
+	ur := repository.NewUserRepository()
 
 	var user models.User
-	json.Unmarshal([]byte(c.Body()), &user)
+	json.Unmarshal(c.Body(), &user)
 
-	res, err := collection.InsertOne(context.Background(), user)
+	u, err := ur.Create(&user)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message": err.Error(),
 		})
 	}
 
-	return c.JSON(res)
+	return c.Status(fiber.StatusCreated).JSON(*u)
 }
 
 // updateUser godoc
@@ -107,30 +92,19 @@ func createUser(c *fiber.Ctx) error {
 // @Param id path int true "User ID"
 // @Router /users/{id} [put]
 func updateUser(c *fiber.Ctx) error {
-	collection, err := repository.GetMongoDbCollection("users")
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": err.Error(),
-		})
-	}
+	ur := repository.NewUserRepository()
 
 	var user models.User
 	json.Unmarshal(c.Body(), &user)
 
-	update := bson.M{
-		"$set": user,
-	}
-
-	objID, _ := primitive.ObjectIDFromHex(c.Params("id"))
-	res, err := collection.UpdateOne(context.Background(), bson.M{"Id": objID}, update)
-
+	err := ur.Update(c.Params("id"), user)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message": err.Error(),
 		})
 	}
 
-	return c.JSON(res)
+	return c.JSON(user)
 }
 
 // deleteUser godoc
@@ -143,21 +117,14 @@ func updateUser(c *fiber.Ctx) error {
 // @Param id path int true "User ID"
 // @Router /users/{id} [delete]
 func deleteUser(c *fiber.Ctx) error {
-	collection, err := repository.GetMongoDbCollection("users")
+	ur := repository.NewUserRepository()
+
+	err := ur.Delete(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message": err.Error(),
 		})
 	}
 
-	objID, _ := primitive.ObjectIDFromHex(c.Params("id"))
-	res, err := collection.DeleteOne(context.Background(), bson.M{"Id": objID})
-
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": err.Error(),
-		})
-	}
-
-	return c.JSON(res)
+	return c.SendStatus(fiber.StatusNoContent)
 }

@@ -2,10 +2,12 @@ package cmd
 
 import (
 	_ "github.com/JDR-ynovant/api/docs"
+	"github.com/JDR-ynovant/api/internal/middleware/auth"
 	"github.com/JDR-ynovant/api/internal/repository"
 	"github.com/JDR-ynovant/api/internal/routes"
 	swagger "github.com/arsmn/fiber-swagger/v2"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/spf13/cobra"
 	"log"
 )
@@ -18,10 +20,12 @@ import (
 // @host localhost:3000
 // @BasePath /
 func executeServeCommand() {
-	handlers := []routes.RouteHandler{routes.UserRouteHandler{}}
+	handlers := []routes.RouteHandler{routes.UserRouteHandler{},routes.PushRouteHandler{}}
 	app := fiber.New()
 
-	api := app.Group("/api")
+	app.Use(auth.New())
+
+	api := app.Group("/api", logger.New())
 	api.Get("/swagger/*", swagger.Handler)
 
 	for _, handler := range handlers {

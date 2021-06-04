@@ -11,7 +11,7 @@ import (
 )
 
 type Repository interface {
-	FindById(id string) interface{}
+	FindOneById(id string) interface{}
 }
 
 var connection *mongo.Client
