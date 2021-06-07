@@ -35,7 +35,12 @@ jobs:
           go get -u github.com/swaggo/swag/cmd/swag && \
           go get -u honnef.co/go/tools/cmd/staticcheck
 
-      - run: |
+      - name: lint code
+        run: |
           swag init --parseDependency
           gofmt -s -w **/*.go
           staticcheck ./...
+
+      - name: run tests
+        run: |
+          go test ./...

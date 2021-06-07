@@ -49,6 +49,7 @@ func (PushRouteHandler) Register(app fiber.Router) {
 // @Tags subscribe
 // @Accept  json
 // @Produce  json
+// @Param X-User header string true "Owner of the subscription"
 // @Param subscription body SubscriptionRequest true "Subscription data"
 // @Success 200
 // @Router /api/subscribe [post]
