@@ -43,6 +43,15 @@ func (PushRouteHandler) Register(app fiber.Router) {
 	log.Println("Registered push api group.")
 }
 
+// handleSubscribe godoc
+// @Summary Subscribe to Push Notification
+// @Description Allow to subscribe to game push notification
+// @Tags subscribe
+// @Accept  json
+// @Produce  json
+// @Param subscription body SubscriptionRequest true "Subscription data"
+// @Success 200
+// @Router /api/subscribe [post]
 func handleSubscribe(c *fiber.Ctx) error {
 	authUser := fmt.Sprintf("%s", c.Locals(auth.ConfigDefault.ContextKey))
 	if authUser == "" {
