@@ -1,7 +1,12 @@
 package routes
 
 import (
+	"fmt"
+	"github.com/JDR-ynovant/api/internal/middleware/auth"
 	"github.com/JDR-ynovant/api/internal/models"
+	"github.com/JDR-ynovant/api/internal/repository"
+	"github.com/JDR-ynovant/api/internal/service/engine"
+	"github.com/go-playground/validator"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"log"
@@ -26,6 +31,22 @@ type CreateGameRequest struct {
 	PlayerCount int
 }
 
+func ValidateCreateGameRequest(gameRequest CreateGameRequest) []*ErrorResponse {
+	var errors []*ErrorResponse
+	validate := validator.New()
+	err := validate.Struct(gameRequest)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element ErrorResponse
+			element.FailedField = err.StructNamespace()
+			element.Tag = err.Tag()
+			element.Value = err.Param()
+			errors = append(errors, &element)
+		}
+	}
+	return errors
+}
+
 // createGame godoc
 // @Summary Create a new Game
 // @Description Generate all objects to generate a new Game
@@ -37,6 +58,43 @@ type CreateGameRequest struct {
 // @Success 200 {object} models.Game
 // @Router /api/games [post]
 func createGame(c *fiber.Ctx) error {
+	owner := fmt.Sprintf("%s", c.Locals(auth.ContextKey))
+	if owner == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": fmt.Sprintf("missing %s header.", auth.Header),
+		})
+	}
+
+	createGameRequest := new(CreateGameRequest)
+	if err := c.BodyParser(createGameRequest); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	validationErrors := ValidateCreateGameRequest(*createGameRequest)
+	if validationErrors != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": validationErrors,
+		})
+	}
+
+	gr := repository.NewGameRepository()
+	game, _ := engine.GenerateGame(owner, createGameRequest.Name, createGameRequest.PlayerCount)
+
+	createdGame, err := gr.Create(game)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("%v\n", createdGame.Id)
+
+	err = gr.AttachUser(owner, createdGame.Id.String())
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
 	return c.SendStatus(fiber.StatusOK)
 }
 

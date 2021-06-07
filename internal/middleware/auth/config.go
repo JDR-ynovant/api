@@ -23,11 +23,14 @@ type Config struct {
 	ContextKey string
 }
 
+const ContextKey = "authenticatedUser"
+const Header = "X-User"
+
 // ConfigDefault is the default config
 var ConfigDefault = Config{
 	Next:       nil,
-	Header:     "X-User",
-	ContextKey: "authenticatedUser",
+	Header:     Header,
+	ContextKey: ContextKey,
 }
 
 // Helper function to set default values

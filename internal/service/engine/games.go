@@ -9,7 +9,7 @@ import (
 
 const BASE_OBJECT_COUNT = 1.6
 
-func GenerateGame(name string, owner string, playerCount int) (*models.Game, error) {
+func GenerateGame(owner string, name string, playerCount int) (*models.Game, error) {
 	ownerPrimitive, _ := primitive.ObjectIDFromHex(owner)
 	grid, err := GenerateGrid(DEFAULT_GRID_WIDTH, DEFAULT_GRID_HEIGHT)
 

@@ -10,10 +10,6 @@ import (
 	"log"
 )
 
-type Repository interface {
-	FindOneById(id string) interface{}
-}
-
 var connection *mongo.Client
 var connectionError error
 

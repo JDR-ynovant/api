@@ -54,10 +54,10 @@ func (PushRouteHandler) Register(app fiber.Router) {
 // @Success 200
 // @Router /api/subscribe [post]
 func handleSubscribe(c *fiber.Ctx) error {
-	authUser := fmt.Sprintf("%s", c.Locals(auth.ConfigDefault.ContextKey))
+	authUser := fmt.Sprintf("%s", c.Locals(auth.ContextKey))
 	if authUser == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "missing X-User header.",
+			"message": fmt.Sprintf("missing %s header.", auth.Header),
 		})
 	}
 
@@ -84,7 +84,7 @@ func handleSubscribe(c *fiber.Ctx) error {
 	}
 
 	fetchedUser.Subscription = subscription.Subscription
-	err = ur.Update(fetchedUser.Id.Hex(), *fetchedUser)
+	err = ur.Update(fetchedUser.Id.String(), *fetchedUser)
 
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{

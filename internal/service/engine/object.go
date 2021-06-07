@@ -3,6 +3,7 @@ package engine
 import (
 	"github.com/JDR-ynovant/api/internal/models"
 	"math/rand"
+	"time"
 )
 
 func GenerateObjects(grid *models.Grid, count int) []models.Object {
@@ -42,6 +43,7 @@ func randomObject(x int, y int) models.Object {
 	return models.Object{
 		Name:      randomFromArray(getAvailableObjectNames()),
 		Type:      randomFromArray(getAvailableObjectTypes()),
+		Value:     randomObjectValue(),
 		PositionX: x,
 		PositionY: y,
 		Picked:    false,
@@ -58,4 +60,9 @@ func getAvailableObjectTypes() []string {
 
 func randomFromArray(strings []string) string {
 	return strings[rand.Intn(len(strings))]
+}
+
+func randomObjectValue() int {
+	rand.Seed(time.Now().UnixNano())
+	return rand.Intn(models.OBJECT_MAXIMAL_VALUE)
 }

@@ -14,20 +14,7 @@ type Object struct {
 	Picked    bool               `json:"picked,omitempty"`
 }
 
-//type Weapon struct {
-//	Object
-//	Damage int `json:"damage,omitempty"`
-//}
-//
-//type Potion struct {
-//	Object
-//	Value int        `json:"value,omitempty"`
-//	Kind  PotionType `json:"kind,omitempty"`
-//}
-//
-//type PotionType string
-//
-//const (
-//	POTION_TYPE_DAMAGE PotionType = "damage"
-//	POTION_TYPE_HEAL   PotionType = "HEAL"
-//)
+const (
+	OBJECT_MINIMAL_VALUE = 1
+	OBJECT_MAXIMAL_VALUE = 4
+)
