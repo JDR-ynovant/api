@@ -84,7 +84,7 @@ func handleSubscribe(c *fiber.Ctx) error {
 	}
 
 	fetchedUser.Subscription = subscription.Subscription
-	err = ur.Update(fetchedUser.Id.String(), *fetchedUser)
+	err = ur.Update(fetchedUser.Id.Hex(), *fetchedUser)
 
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{

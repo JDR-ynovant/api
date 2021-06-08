@@ -84,11 +84,12 @@ func createGame(c *fiber.Ctx) error {
 
 	createdGame, err := gr.Create(game)
 	if err != nil {
-		return err
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
 	}
-	fmt.Printf("%v\n", createdGame.Id)
 
-	err = gr.AttachUser(owner, createdGame.Id.String())
+	err = gr.AttachUser(owner, createdGame.Id.Hex())
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message": err.Error(),

@@ -5,6 +5,7 @@ import (
 	"github.com/JDR-ynovant/api/internal/models"
 	"github.com/JDR-ynovant/api/internal/repository"
 	"github.com/gofiber/fiber/v2"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"log"
 )
 
@@ -69,8 +70,14 @@ func getUser(c *fiber.Ctx) error {
 func createUser(c *fiber.Ctx) error {
 	ur := repository.NewUserRepository()
 
-	var user models.User
-	json.Unmarshal(c.Body(), &user)
+	user := models.User{
+		Games: make([]primitive.ObjectID, 0),
+	}
+	if err := c.BodyParser(&user); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
 
 	u, err := ur.Create(&user)
 	if err != nil {
