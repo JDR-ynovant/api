@@ -15,9 +15,9 @@ func (GridsRouteHandler) Register(api fiber.Router) {
 }
 
 // handleGetGrid godoc
-// @Summary Subscribe to Push Notification
-// @Description Allow to subscribe to game push notification
-// @Tags subscribe
+// @Summary Get Grid
+// @Description Fetch grid based on its ID
+// @Tags grids
 // @Accept  json
 // @Produce  json
 // @Param id path {string} true "Grid ID"
