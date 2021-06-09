@@ -20,7 +20,7 @@ import (
 // @host localhost:3000
 // @BasePath /
 func executeServeCommand() {
-	handlers := []routes.RouteHandler{routes.UserRouteHandler{}, routes.PushRouteHandler{}, routes.GamesRouteHandler{}}
+	handlers := []routes.RouteHandler{routes.UserRouteHandler{}, routes.PushRouteHandler{}, routes.GamesRouteHandler{}, routes.GridsRouteHandler{}}
 	app := fiber.New()
 
 	app.Use(auth.New())

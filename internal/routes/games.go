@@ -17,11 +17,12 @@ type GamesRouteHandler struct{}
 func (GamesRouteHandler) Register(app fiber.Router) {
 	gamesApi := app.Group("/games")
 
-	gamesApi.Post("", createGame)
-	gamesApi.Post("/:id/join", joinGame)
-	gamesApi.Post("/:id/leave", leaveGame)
-	gamesApi.Post("/:id/start", startGame)
-	gamesApi.Post("/:id/turn", nextTurnGame)
+	gamesApi.Post("", handleCreateGame)
+	gamesApi.Get("/:id", handleGetGame)
+	gamesApi.Post("/:id/join", handleJoinGame)
+	gamesApi.Post("/:id/leave", handleLeaveGame)
+	gamesApi.Post("/:id/start", handleStartGame)
+	gamesApi.Post("/:id/turn", handleNextTurn)
 
 	log.Println("Registered games api group.")
 }
@@ -47,7 +48,29 @@ func ValidateCreateGameRequest(gameRequest CreateGameRequest) []*ErrorResponse {
 	return errors
 }
 
-// createGame godoc
+// handleGetGame godoc
+// @Summary Get a Game
+// @Description Fetch a game by its ID
+// @Tags games
+// @Accept  json
+// @Produce  json
+// @Param id path {string} true "Game ID"
+// @Success 200 {object} models.Game
+// @Router /api/games/{id} [get]
+func handleGetGame(c *fiber.Ctx) error {
+	gr := repository.NewGameRepository()
+
+	game, err := gr.FindOneById(c.Params("id"))
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	return c.JSON(game)
+}
+
+// handleCreateGame godoc
 // @Summary Create a new Game
 // @Description Generate all objects to generate a new Game
 // @Tags games
@@ -57,7 +80,7 @@ func ValidateCreateGameRequest(gameRequest CreateGameRequest) []*ErrorResponse {
 // @Param game body CreateGameRequest true "New Game data"
 // @Success 200 {object} models.Game
 // @Router /api/games [post]
-func createGame(c *fiber.Ctx) error {
+func handleCreateGame(c *fiber.Ctx) error {
 	owner := fmt.Sprintf("%s", c.Locals(auth.ContextKey))
 	if owner == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -96,10 +119,10 @@ func createGame(c *fiber.Ctx) error {
 		})
 	}
 
-	return c.SendStatus(fiber.StatusOK)
+	return c.Status(fiber.StatusOK).JSON(createdGame)
 }
 
-// joinGame godoc
+// handleJoinGame godoc
 // @Summary Join a game
 // @Description The given player will join the game
 // @Tags games
@@ -109,11 +132,11 @@ func createGame(c *fiber.Ctx) error {
 // @Param id path int true "Game ID"
 // @Success 200
 // @Router /api/games/{id}/join [post]
-func joinGame(c *fiber.Ctx) error {
+func handleJoinGame(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusOK)
 }
 
-// leaveGame godoc
+// handleLeaveGame godoc
 // @Summary Join a game
 // @Description The given player will leave the game
 // @Tags games
@@ -123,11 +146,11 @@ func joinGame(c *fiber.Ctx) error {
 // @Param id path int true "Game ID"
 // @Success 200
 // @Router /api/games/{id}/leave [post]
-func leaveGame(c *fiber.Ctx) error {
+func handleLeaveGame(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusOK)
 }
 
-// leaveGame godoc
+// handleStartGame godoc
 // @Summary Start a game
 // @Description The game will start, expiry date will be set and owners turn will begin.
 // @Tags games
@@ -137,7 +160,51 @@ func leaveGame(c *fiber.Ctx) error {
 // @Param id path int true "Game ID"
 // @Success 200
 // @Router /api/games/{id}/start [post]
-func startGame(c *fiber.Ctx) error {
+func handleStartGame(c *fiber.Ctx) error {
+	owner := fmt.Sprintf("%s", c.Locals(auth.ContextKey))
+	if owner == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": fmt.Sprintf("missing %s header.", auth.Header),
+		})
+	}
+
+	gameId := c.Params("id")
+	if gameId == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "missing game ID",
+		})
+	}
+
+	gr := repository.NewGameRepository()
+	game, err := gr.FindOneById(gameId)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"message": "Game ID not found",
+		})
+	}
+
+	grr := repository.NewGridRepository()
+	grid := engine.GenerateGrid(engine.DEFAULT_GRID_WIDTH, engine.DEFAULT_GRID_HEIGHT)
+	err = grr.Create(grid)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	objects := engine.GenerateObjects(grid, game.PlayerCount)
+	game.Objects = objects
+
+	game.Grid = grid.Id
+	game.Status = models.GAME_STATUS_STARTED
+
+	err = gr.Update(gameId, *game)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
 	return c.SendStatus(fiber.StatusOK)
 }
 
@@ -148,7 +215,7 @@ type NewTurnRequest struct {
 	Player  primitive.ObjectID
 }
 
-// nextTurnGame godoc
+// handleNextTurn godoc
 // @Summary Play a games turn
 // @Description Play the given turn of the given game.
 // @Tags games
@@ -158,6 +225,6 @@ type NewTurnRequest struct {
 // @Param id path int true "Game ID"
 // @Success 200
 // @Router /api/games/{id}/turn [post]
-func nextTurnGame(c *fiber.Ctx) error {
+func handleNextTurn(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusOK)
 }

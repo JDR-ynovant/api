@@ -11,7 +11,7 @@ const (
 	DEFAULT_GRID_HEIGHT = 15
 )
 
-func GenerateGrid(width int, height int) (*models.Grid, error) {
+func GenerateGrid(width int, height int) *models.Grid {
 	grid := models.Grid{
 		Width:  width,
 		Height: height,
@@ -31,7 +31,7 @@ func GenerateGrid(width int, height int) (*models.Grid, error) {
 		}
 	}
 
-	return &grid, nil
+	return &grid
 }
 
 func randomCoordinates(width int, height int) (int, int) {

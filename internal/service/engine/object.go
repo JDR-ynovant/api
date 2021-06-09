@@ -2,12 +2,14 @@ package engine
 
 import (
 	"github.com/JDR-ynovant/api/internal/models"
+	"math"
 	"math/rand"
 	"time"
 )
 
-func GenerateObjects(grid *models.Grid, count int) []models.Object {
+func GenerateObjects(grid *models.Grid, playerCount int) []models.Object {
 	objects := make([]models.Object, 0)
+	count := int(math.Round(BASE_OBJECT_COUNT * float64(playerCount)))
 
 	for i := 0; i < count; i++ {
 		var (
@@ -18,8 +20,9 @@ func GenerateObjects(grid *models.Grid, count int) []models.Object {
 		for {
 			x, y = randomCoordinates(grid.Width, grid.Height)
 			cell := grid.CellAtCoordinates(x, y)
+			cellIsNotOnLimitBound := x != 0 && y != 0 && x != grid.Width && y != grid.Height
 
-			if cell.Type != models.CELL_TYPE_OBSTACLE && !hasObjectAtCoordinates(objects, x, y) {
+			if cellIsNotOnLimitBound && cell.Type != models.CELL_TYPE_OBSTACLE && !hasObjectAtCoordinates(objects, x, y) {
 				break
 			}
 		}
