@@ -54,7 +54,7 @@ func ValidateCreateGameRequest(gameRequest CreateGameRequest) []*ErrorResponse {
 // @Tags games
 // @Accept  json
 // @Produce  json
-// @Param id path {string} true "Game ID"
+// @Param id path string true "Game ID"
 // @Success 200 {object} models.Game
 // @Router /api/games/{id} [get]
 func handleGetGame(c *fiber.Ctx) error {
@@ -222,7 +222,7 @@ type NewTurnRequest struct {
 // @Accept json
 // @Produce json
 // @Param turn body NewTurnRequest true "New turn data"
-// @Param id path int true "Game ID"
+// @Param id path string true "Game ID"
 // @Success 200
 // @Router /api/games/{id}/turn [post]
 func handleNextTurn(c *fiber.Ctx) error {

@@ -20,7 +20,7 @@ func (GridsRouteHandler) Register(api fiber.Router) {
 // @Tags grids
 // @Accept  json
 // @Produce  json
-// @Param id path {string} true "Grid ID"
+// @Param id path string true "Grid ID"
 // @Success 200 {object} models.Grid
 // @Router /api/subscribe [post]
 func handleGetGrid(c *fiber.Ctx) error {
