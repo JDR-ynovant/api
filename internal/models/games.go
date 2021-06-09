@@ -28,3 +28,12 @@ const (
 	GAME_STATUS_STARTED  GameStatus = "started"
 	GAME_STATUS_FINISHED GameStatus = "finished"
 )
+
+func (g Game) HasPlayer(userId primitive.ObjectID) bool {
+	for _, player := range g.Players {
+		if player.User == userId {
+			return true
+		}
+	}
+	return false
+}

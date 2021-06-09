@@ -10,10 +10,11 @@ const BASE_OBJECT_COUNT = 1.6
 
 func GenerateGame(owner string, name string, playerCount int) (*models.Game, error) {
 	ownerPrimitive, _ := primitive.ObjectIDFromHex(owner)
+	players := []models.Character{*CreateCharacter(ownerPrimitive)}
 
 	game := models.Game{
 		Name:           name,
-		Players:        make([]models.Character, 0),
+		Players:        players,
 		PlayerCount:    playerCount,
 		Playing:        ownerPrimitive,
 		Owner:          ownerPrimitive,

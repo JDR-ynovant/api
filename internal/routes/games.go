@@ -133,6 +133,50 @@ func handleCreateGame(c *fiber.Ctx) error {
 // @Success 200
 // @Router /api/games/{id}/join [post]
 func handleJoinGame(c *fiber.Ctx) error {
+	player := fmt.Sprintf("%s", c.Locals(auth.ContextKey))
+	if player == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": fmt.Sprintf("missing %s header.", auth.Header),
+		})
+	}
+	playerObject := c.Locals(auth.ObjectKey).(*models.User)
+
+	gr := repository.NewGameRepository()
+	game, err := gr.FindOneById(c.Params("id"))
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	if game.Status != models.GAME_STATUS_CREATED {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "game has already started",
+		})
+	}
+
+	playerId, _ := primitive.ObjectIDFromHex(player)
+	if !game.HasPlayer(playerId) {
+		character := engine.CreateCharacter(playerId)
+		game.Players = append(game.Players, *character)
+
+		err = gr.Update(c.Params("id"), *game)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"message": err.Error(),
+			})
+		}
+
+		ur := repository.NewUserRepository()
+		playerObject.Games = append(playerObject.Games, game.Id)
+		err = ur.Update(playerId.Hex(), *playerObject)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"message": err.Error(),
+			})
+		}
+	}
+
 	return c.SendStatus(fiber.StatusOK)
 }
 

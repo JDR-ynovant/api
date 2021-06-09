@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"fmt"
+	"github.com/JDR-ynovant/api/internal/repository"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -21,6 +23,19 @@ func New(config ...Config) fiber.Handler {
 
 		// Add the request ID to locals
 		c.Locals(cfg.ContextKey, user)
+
+		uString := fmt.Sprintf("%s", user)
+		if uString != "" {
+			ur := repository.NewUserRepository()
+			userObject, err := ur.FindOneById(uString)
+			if err != nil {
+				return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+					"message": err.Error(),
+				})
+			}
+
+			c.Locals(cfg.ObjectKey, userObject)
+		}
 
 		// Continue stack
 		return c.Next()

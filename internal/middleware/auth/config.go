@@ -21,9 +21,16 @@ type Config struct {
 	//
 	// Optional. Default: authenticatedUser
 	ContextKey string
+
+	// ObjectKey defines the key used when storing the request ID in
+	// the locals for a specific request.
+	//
+	// Optional. Default: authenticatedUser
+	ObjectKey string
 }
 
 const ContextKey = "authenticatedUser"
+const ObjectKey = "authenticatedUserObject"
 const Header = "X-User"
 
 // ConfigDefault is the default config
@@ -31,6 +38,7 @@ var ConfigDefault = Config{
 	Next:       nil,
 	Header:     Header,
 	ContextKey: ContextKey,
+	ObjectKey:  ObjectKey,
 }
 
 // Helper function to set default values
@@ -50,6 +58,10 @@ func configDefault(config ...Config) Config {
 
 	if cfg.ContextKey == "" {
 		cfg.ContextKey = ConfigDefault.ContextKey
+	}
+
+	if cfg.ObjectKey == "" {
+		cfg.ObjectKey = ConfigDefault.ObjectKey
 	}
 
 	return cfg
