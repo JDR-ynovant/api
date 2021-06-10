@@ -22,6 +22,7 @@ func (GamesRouteHandler) Register(app fiber.Router) {
 	gamesApi.Post("/:id/join", handleJoinGame)
 	gamesApi.Post("/:id/leave", handleLeaveGame)
 	gamesApi.Post("/:id/start", handleStartGame)
+	gamesApi.Post("/:id/stop", handleStopGame)
 	gamesApi.Post("/:id/turn", handleNextTurn)
 
 	log.Println("Registered games api group.")
@@ -181,7 +182,7 @@ func handleJoinGame(c *fiber.Ctx) error {
 }
 
 // handleLeaveGame godoc
-// @Summary Join a game
+// @Summary Leave a game
 // @Description The given player will leave the game
 // @Tags games
 // @Accept json
@@ -191,12 +192,60 @@ func handleJoinGame(c *fiber.Ctx) error {
 // @Success 200
 // @Router /api/games/{id}/leave [post]
 func handleLeaveGame(c *fiber.Ctx) error {
+	player := fmt.Sprintf("%s", c.Locals(auth.ContextKey))
+	if player == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": fmt.Sprintf("missing %s header.", auth.Header),
+		})
+	}
+	playerObject := c.Locals(auth.ObjectKey).(*models.User)
+
+	gr := repository.NewGameRepository()
+	game, err := gr.FindOneById(c.Params("id"))
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	if game.Status == models.GAME_STATUS_FINISHED {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "game has finished",
+		})
+	}
+
+	if game.Owner == playerObject.Id {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "owner cannot leave its game",
+		})
+	}
+
+	playerId, _ := primitive.ObjectIDFromHex(player)
+	if game.HasPlayer(playerId) {
+		game.RemovePlayer(playerObject.Id)
+		err = gr.Update(c.Params("id"), *game)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"message": err.Error(),
+			})
+		}
+
+		ur := repository.NewUserRepository()
+		playerObject.RemoveGame(game.Id)
+		err = ur.Update(playerId.Hex(), *playerObject)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"message": err.Error(),
+			})
+		}
+	}
+
 	return c.SendStatus(fiber.StatusOK)
 }
 
 // handleStartGame godoc
 // @Summary Start a game
-// @Description The game will start, expiry date will be set and owners turn will begin.
+// @Description The game will start, expiry date will be set and owners turn will begin. Only Game owner can start a Game.
 // @Tags games
 // @Accept json
 // @Produce json
@@ -211,6 +260,7 @@ func handleStartGame(c *fiber.Ctx) error {
 			"message": fmt.Sprintf("missing %s header.", auth.Header),
 		})
 	}
+	playerObject := c.Locals(auth.ObjectKey).(*models.User)
 
 	gameId := c.Params("id")
 	if gameId == "" {
@@ -224,6 +274,12 @@ func handleStartGame(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"message": "Game ID not found",
+		})
+	}
+
+	if game.Owner != playerObject.Id {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"message": "only owner can start game its",
 		})
 	}
 
@@ -270,5 +326,55 @@ type NewTurnRequest struct {
 // @Success 200
 // @Router /api/games/{id}/turn [post]
 func handleNextTurn(c *fiber.Ctx) error {
+	return c.SendStatus(fiber.StatusOK)
+}
+
+// handleStopGame godoc
+// @Summary Terminate a Game
+// @Description The game will finish and no more turn can be played. Only Game owner can stop a Game.
+// @Tags games
+// @Accept json
+// @Produce json
+// @Param id path string true "Game ID"
+// @Success 200
+// @Router /api/games/{id}/stop [post]
+func handleStopGame(c *fiber.Ctx) error {
+	owner := fmt.Sprintf("%s", c.Locals(auth.ContextKey))
+	if owner == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": fmt.Sprintf("missing %s header.", auth.Header),
+		})
+	}
+	playerObject := c.Locals(auth.ObjectKey).(*models.User)
+
+	gameId := c.Params("id")
+	if gameId == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "missing game ID",
+		})
+	}
+
+	gr := repository.NewGameRepository()
+	game, err := gr.FindOneById(gameId)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"message": "Game ID not found",
+		})
+	}
+
+	if game.Owner != playerObject.Id {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"message": "only owner can start game its",
+		})
+	}
+
+	game.Status = models.GAME_STATUS_FINISHED
+	err = gr.Update(gameId, *game)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
 	return c.SendStatus(fiber.StatusOK)
 }

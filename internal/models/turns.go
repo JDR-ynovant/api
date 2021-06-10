@@ -13,26 +13,13 @@ type Turn struct {
 
 type Action struct {
 	Type string `json:"type,omitempty"`
-}
 
-type MoveAction struct {
-	Action
+	// MoveAction
 	TargetX int `json:"targetX,omitempty"`
 	TargetY int `json:"targetY,omitempty"`
-}
-
-type AttackAction struct {
-	MoveAction
+	// AttackAction & UsageAction
 	Character primitive.ObjectID `json:"character,omitempty"`
 	Object    primitive.ObjectID `json:"weapon,omitempty"`
-}
-
-type UsageAction struct {
-	Action
-	Object primitive.ObjectID `json:"object,omitempty"`
-}
-
-type NullAction struct {
-	Action
+	// NullAction
 	Reason string `json:"reason,omitempty"`
 }

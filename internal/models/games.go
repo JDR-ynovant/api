@@ -37,3 +37,15 @@ func (g Game) HasPlayer(userId primitive.ObjectID) bool {
 	}
 	return false
 }
+
+func (g Game) RemovePlayer(player primitive.ObjectID) {
+	var playerIndex int
+	for i := 0; i < len(g.Players); i++ {
+		if player == g.Players[i].Id {
+			playerIndex = i
+		}
+	}
+
+	g.Players[playerIndex] = g.Players[len(g.Players)-1]
+	g.Players = g.Players[:len(g.Players)-1]
+}
