@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"fmt"
 	"github.com/JDR-ynovant/api/internal/repository"
 	"github.com/gofiber/fiber/v2"
 )
@@ -26,7 +25,7 @@ func NewAuthHeaderHandler(config ...Config) fiber.Handler {
 		// Add the request ID to locals
 		c.Locals(moduleConfiguration.ContextKey, user)
 
-		uString := fmt.Sprintf("%s", user)
+		uString := string(user)
 		if uString != "" {
 			ur := repository.NewUserRepository()
 			userObject, err := ur.FindOneById(uString)
@@ -53,7 +52,7 @@ func NewAuthRequiredHandler() fiber.Handler {
 			return c.Next()
 		}
 
-		playerId := fmt.Sprintf("%s", c.Locals(moduleConfiguration.ContextKey).([]byte))
+		playerId := string(c.Locals(moduleConfiguration.ContextKey).([]byte))
 		if playerId == "" {
 			return c.SendStatus(fiber.StatusUnauthorized)
 		}

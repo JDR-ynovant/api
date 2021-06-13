@@ -24,7 +24,7 @@ func (u User) HasGameAttached(gameID string) bool {
 	return false
 }
 
-func (u User) RemoveGame(game primitive.ObjectID) {
+func (u *User) RemoveGame(game primitive.ObjectID) {
 	var playerIndex int
 	for i := 0; i < len(u.Games); i++ {
 		if game == u.Games[i] {
