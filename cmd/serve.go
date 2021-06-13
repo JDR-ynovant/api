@@ -23,7 +23,7 @@ func executeServeCommand() {
 	handlers := []routes.RouteHandler{routes.UserRouteHandler{}, routes.PushRouteHandler{}, routes.GamesRouteHandler{}, routes.GridsRouteHandler{}}
 	app := fiber.New()
 
-	app.Use(auth.New())
+	app.Use(auth.NewAuthHeaderHandler())
 
 	api := app.Group("/api", logger.New())
 	api.Get("/swagger/*", swagger.Handler)

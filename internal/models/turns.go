@@ -11,10 +11,19 @@ type Turn struct {
 	TurnNumber int                `json:"turnNumber,omitempty"`
 }
 
-type Action struct {
-	Type string `json:"type,omitempty"`
+type ActionType string
 
-	// MoveAction
+const (
+	ACTION_TYPE_MOVE   ActionType = "move"
+	ACTION_TYPE_ATTACK ActionType = "attack"
+	ACTION_TYPE_USAGE  ActionType = "usage"
+	ACTION_TYPE_NULL   ActionType = "null"
+)
+
+type Action struct {
+	Type ActionType `json:"type,omitempty"`
+
+	// MoveAction && AttackAction
 	TargetX int `json:"targetX,omitempty"`
 	TargetY int `json:"targetY,omitempty"`
 	// AttackAction & UsageAction
@@ -22,4 +31,33 @@ type Action struct {
 	Object    primitive.ObjectID `json:"weapon,omitempty"`
 	// NullAction
 	Reason string `json:"reason,omitempty"`
+}
+
+func (a Action) Validate() bool {
+	if !isValidActionType(a.Type) {
+		return false
+	}
+
+	switch a.Type {
+	case ACTION_TYPE_USAGE:
+	case ACTION_TYPE_ATTACK:
+		return a.Character != primitive.ObjectID{} && a.Object != primitive.ObjectID{}
+	case ACTION_TYPE_MOVE:
+		return true
+	case ACTION_TYPE_NULL:
+		return a.Reason != ""
+	}
+
+	return false
+}
+
+func isValidActionType(actionType ActionType) bool {
+	switch actionType {
+	case ACTION_TYPE_MOVE:
+	case ACTION_TYPE_ATTACK:
+	case ACTION_TYPE_USAGE:
+	case ACTION_TYPE_NULL:
+		return true
+	}
+	return false
 }

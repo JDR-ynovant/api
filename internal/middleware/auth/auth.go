@@ -6,23 +6,25 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// New creates a new middleware handler
-func New(config ...Config) fiber.Handler {
+var moduleConfiguration Config
+
+// NewAuthHeaderHandler creates a new middleware handler
+func NewAuthHeaderHandler(config ...Config) fiber.Handler {
 	// Set default config
-	cfg := configDefault(config...)
+	moduleConfiguration = configDefault(config...)
 
 	// Return new handler
 	return func(c *fiber.Ctx) error {
 		// Don't execute middleware if Next returns true
-		if cfg.Next != nil && cfg.Next(c) {
+		if moduleConfiguration.Next != nil && moduleConfiguration.Next(c) {
 			return c.Next()
 		}
 
 		// Get id from request, else we generate one
-		user := c.Request().Header.Peek(cfg.Header)
+		user := c.Request().Header.Peek(moduleConfiguration.Header)
 
 		// Add the request ID to locals
-		c.Locals(cfg.ContextKey, user)
+		c.Locals(moduleConfiguration.ContextKey, user)
 
 		uString := fmt.Sprintf("%s", user)
 		if uString != "" {
@@ -34,7 +36,26 @@ func New(config ...Config) fiber.Handler {
 				})
 			}
 
-			c.Locals(cfg.ObjectKey, userObject)
+			c.Locals(moduleConfiguration.ObjectKey, userObject)
+		}
+
+		// Continue stack
+		return c.Next()
+	}
+}
+
+// NewAuthRequiredHandler creates a new middleware handler
+func NewAuthRequiredHandler() fiber.Handler {
+	// Return new handler
+	return func(c *fiber.Ctx) error {
+		// Don't execute middleware if Next returns true
+		if moduleConfiguration.Next != nil && moduleConfiguration.Next(c) {
+			return c.Next()
+		}
+
+		playerId := fmt.Sprintf("%s", c.Locals(moduleConfiguration.ContextKey).([]byte))
+		if playerId == "" {
+			return c.SendStatus(fiber.StatusUnauthorized)
 		}
 
 		// Continue stack

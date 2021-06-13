@@ -38,7 +38,7 @@ func ValidateStruct(subscription SubscriptionRequest) []*ErrorResponse {
 }
 
 func (PushRouteHandler) Register(app fiber.Router) {
-	app.Post("/subscribe", handleSubscribe)
+	app.Post("/subscribe", auth.NewAuthRequiredHandler(), handleSubscribe)
 
 	log.Println("Registered push api group.")
 }

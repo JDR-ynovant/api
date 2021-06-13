@@ -17,13 +17,13 @@ type GamesRouteHandler struct{}
 func (GamesRouteHandler) Register(app fiber.Router) {
 	gamesApi := app.Group("/games")
 
-	gamesApi.Post("", handleCreateGame)
+	gamesApi.Post("", auth.NewAuthRequiredHandler(), handleCreateGame)
 	gamesApi.Get("/:id", handleGetGame)
-	gamesApi.Post("/:id/join", handleJoinGame)
-	gamesApi.Post("/:id/leave", handleLeaveGame)
-	gamesApi.Post("/:id/start", handleStartGame)
-	gamesApi.Post("/:id/stop", handleStopGame)
-	gamesApi.Post("/:id/turn", handleNextTurn)
+	gamesApi.Post("/:id/join", auth.NewAuthRequiredHandler(), handleJoinGame)
+	gamesApi.Post("/:id/leave", auth.NewAuthRequiredHandler(), handleLeaveGame)
+	gamesApi.Post("/:id/start", auth.NewAuthRequiredHandler(), handleStartGame)
+	gamesApi.Post("/:id/stop", auth.NewAuthRequiredHandler(), handleStopGame)
+	gamesApi.Post("/:id/turn", auth.NewAuthRequiredHandler(), handleNextTurn)
 
 	log.Println("Registered games api group.")
 }
@@ -83,12 +83,6 @@ func handleGetGame(c *fiber.Ctx) error {
 // @Router /api/games [post]
 func handleCreateGame(c *fiber.Ctx) error {
 	owner := fmt.Sprintf("%s", c.Locals(auth.ContextKey))
-	if owner == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": fmt.Sprintf("missing %s header.", auth.Header),
-		})
-	}
-
 	createGameRequest := new(CreateGameRequest)
 	if err := c.BodyParser(createGameRequest); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -135,11 +129,6 @@ func handleCreateGame(c *fiber.Ctx) error {
 // @Router /api/games/{id}/join [post]
 func handleJoinGame(c *fiber.Ctx) error {
 	player := fmt.Sprintf("%s", c.Locals(auth.ContextKey))
-	if player == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": fmt.Sprintf("missing %s header.", auth.Header),
-		})
-	}
 	playerObject := c.Locals(auth.ObjectKey).(*models.User)
 
 	gr := repository.NewGameRepository()
@@ -193,11 +182,6 @@ func handleJoinGame(c *fiber.Ctx) error {
 // @Router /api/games/{id}/leave [post]
 func handleLeaveGame(c *fiber.Ctx) error {
 	player := fmt.Sprintf("%s", c.Locals(auth.ContextKey))
-	if player == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": fmt.Sprintf("missing %s header.", auth.Header),
-		})
-	}
 	playerObject := c.Locals(auth.ObjectKey).(*models.User)
 
 	gr := repository.NewGameRepository()
@@ -254,12 +238,6 @@ func handleLeaveGame(c *fiber.Ctx) error {
 // @Success 200
 // @Router /api/games/{id}/start [post]
 func handleStartGame(c *fiber.Ctx) error {
-	owner := fmt.Sprintf("%s", c.Locals(auth.ContextKey))
-	if owner == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": fmt.Sprintf("missing %s header.", auth.Header),
-		})
-	}
 	playerObject := c.Locals(auth.ObjectKey).(*models.User)
 
 	gameId := c.Params("id")
@@ -315,6 +293,22 @@ type NewTurnRequest struct {
 	Player  primitive.ObjectID
 }
 
+func ValidateNewTurnRequest(turnRequest NewTurnRequest) []*ErrorResponse {
+	var errors []*ErrorResponse
+	validate := validator.New()
+	err := validate.Struct(turnRequest)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element ErrorResponse
+			element.FailedField = err.StructNamespace()
+			element.Tag = err.Tag()
+			element.Value = err.Param()
+			errors = append(errors, &element)
+		}
+	}
+	return errors
+}
+
 // handleNextTurn godoc
 // @Summary Play a games turn
 // @Description Play the given turn of the given game.
@@ -326,6 +320,21 @@ type NewTurnRequest struct {
 // @Success 200
 // @Router /api/games/{id}/turn [post]
 func handleNextTurn(c *fiber.Ctx) error {
+	//playerObject := c.Locals(auth.ObjectKey).(*models.User)
+	newTurnRequest := new(NewTurnRequest)
+	if err := c.BodyParser(newTurnRequest); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	validationErrors := ValidateNewTurnRequest(*newTurnRequest)
+	if validationErrors != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": validationErrors,
+		})
+	}
+
 	return c.SendStatus(fiber.StatusOK)
 }
 
@@ -339,12 +348,6 @@ func handleNextTurn(c *fiber.Ctx) error {
 // @Success 200
 // @Router /api/games/{id}/stop [post]
 func handleStopGame(c *fiber.Ctx) error {
-	owner := fmt.Sprintf("%s", c.Locals(auth.ContextKey))
-	if owner == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": fmt.Sprintf("missing %s header.", auth.Header),
-		})
-	}
 	playerObject := c.Locals(auth.ObjectKey).(*models.User)
 
 	gameId := c.Params("id")
