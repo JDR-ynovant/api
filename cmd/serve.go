@@ -17,10 +17,15 @@ import (
 // @description Swagger documentation for Candy-Fight Game API
 // @contact.name API Support
 // @contact.email fiber@swagger.io
-// @host localhost:3000
 // @BasePath /
 func executeServeCommand() {
-	handlers := []routes.RouteHandler{routes.UserRouteHandler{}, routes.PushRouteHandler{}, routes.GamesRouteHandler{}, routes.GridsRouteHandler{}}
+	handlers := []routes.RouteHandler{
+		routes.UserRouteHandler{},
+		routes.PushRouteHandler{},
+		routes.GamesRouteHandler{},
+		routes.GridsRouteHandler{},
+		routes.HealthcheckRouteHandler{},
+	}
 	app := fiber.New()
 
 	app.Use(auth.NewAuthHeaderHandler())
