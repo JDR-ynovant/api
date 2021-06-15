@@ -28,7 +28,7 @@ func (UserRouteHandler) Register(app fiber.Router) {
 // @Tags users
 // @Accept  json
 // @Produce  json
-// @Param id path int true "User ID"
+// @Param id path string true "User ID"
 // @Success 200 {object} models.User
 // @Router /users/{id} [get]
 func getUser(c *fiber.Ctx) error {
@@ -122,7 +122,7 @@ func FromUpdateUserRequest(updateUserRequest *UpdateUserRequest) *models.User {
 // @Accept json
 // @Produce json
 // @Success 200 {object} models.User
-// @Param id path int true "User ID"
+// @Param id path string true "User ID"
 // @Router /users/{id} [put]
 func updateUser(c *fiber.Ctx) error {
 	ur := repository.NewUserRepository()
@@ -166,7 +166,7 @@ func updateUser(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Success 200 {object} models.User
-// @Param id path int true "User ID"
+// @Param id path string true "User ID"
 // @Router /users/{id} [delete]
 func deleteUser(c *fiber.Ctx) error {
 	ur := repository.NewUserRepository()

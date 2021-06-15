@@ -124,7 +124,7 @@ func handleCreateGame(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Param X-User header string true "User to join the game"
-// @Param id path int true "Game ID"
+// @Param id path string true "Game ID"
 // @Success 200
 // @Router /api/games/{id}/join [post]
 func handleJoinGame(c *fiber.Ctx) error {
@@ -177,7 +177,7 @@ func handleJoinGame(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Param X-User header string true "User to leave the game"
-// @Param id path int true "Game ID"
+// @Param id path string true "Game ID"
 // @Success 200
 // @Router /api/games/{id}/leave [post]
 func handleLeaveGame(c *fiber.Ctx) error {
@@ -234,7 +234,7 @@ func handleLeaveGame(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Param X-User header string true "Owner of the game to be started"
-// @Param id path int true "Game ID"
+// @Param id path string true "Game ID"
 // @Success 200
 // @Router /api/games/{id}/start [post]
 func handleStartGame(c *fiber.Ctx) error {
