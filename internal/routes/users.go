@@ -1,9 +1,9 @@
 package routes
 
 import (
-	"encoding/json"
 	"github.com/JDR-ynovant/api/internal/models"
 	"github.com/JDR-ynovant/api/internal/repository"
+	"github.com/go-playground/validator"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"log"
@@ -89,6 +89,32 @@ func createUser(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(*u)
 }
 
+type UpdateUserRequest struct {
+	Name string
+}
+
+func ValidateUpdateUserRequest(userRequest UpdateUserRequest) []*ErrorResponse {
+	var errors []*ErrorResponse
+	validate := validator.New()
+	err := validate.Struct(userRequest)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element ErrorResponse
+			element.FailedField = err.StructNamespace()
+			element.Tag = err.Tag()
+			element.Value = err.Param()
+			errors = append(errors, &element)
+		}
+	}
+	return errors
+}
+
+func FromUpdateUserRequest(updateUserRequest *UpdateUserRequest) *models.User {
+	return &models.User{
+		Name: updateUserRequest.Name,
+	}
+}
+
 // updateUser godoc
 // @Summary Update an existing user
 // @Description Update an existing user
@@ -101,17 +127,36 @@ func createUser(c *fiber.Ctx) error {
 func updateUser(c *fiber.Ctx) error {
 	ur := repository.NewUserRepository()
 
-	var user models.User
-	json.Unmarshal(c.Body(), &user)
+	updateUserRequest := new(UpdateUserRequest)
+	if err := c.BodyParser(updateUserRequest); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
 
-	err := ur.Update(c.Params("id"), user)
+	validationErrors := ValidateUpdateUserRequest(*updateUserRequest)
+	if validationErrors != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": validationErrors,
+		})
+	}
+
+	user, err := ur.FindOneById(c.Params("id"))
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	user.Name = updateUserRequest.Name
+	err = ur.Update(c.Params("id"), *user)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message": err.Error(),
 		})
 	}
 
-	return c.JSON(user)
+	return c.JSON(updateUserRequest)
 }
 
 // deleteUser godoc
