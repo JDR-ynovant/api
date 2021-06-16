@@ -12,12 +12,6 @@ import (
 	"log"
 )
 
-// @title Candy Fight API
-// @version 1.0
-// @description Swagger documentation for Candy-Fight Game API
-// @contact.name API Support
-// @contact.email fiber@swagger.io
-// @BasePath /
 func executeServeCommand() {
 	handlers := []routes.RouteHandler{
 		routes.UserRouteHandler{},

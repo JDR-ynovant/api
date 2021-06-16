@@ -52,7 +52,7 @@ func (PushRouteHandler) Register(app fiber.Router) {
 // @Param X-User header string true "Owner of the subscription"
 // @Param subscription body SubscriptionRequest true "Subscription data"
 // @Success 200
-// @Router /api/subscribe [post]
+// @Router /subscribe [post]
 func handleSubscribe(c *fiber.Ctx) error {
 	authUser := fmt.Sprintf("%s", c.Locals(auth.ContextKey))
 	if authUser == "" {

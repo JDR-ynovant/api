@@ -57,7 +57,7 @@ func ValidateCreateGameRequest(gameRequest CreateGameRequest) []*ErrorResponse {
 // @Produce  json
 // @Param id path string true "Game ID"
 // @Success 200 {object} models.Game
-// @Router /api/games/{id} [get]
+// @Router /games/{id} [get]
 func handleGetGame(c *fiber.Ctx) error {
 	gr := repository.NewGameRepository()
 
@@ -80,7 +80,7 @@ func handleGetGame(c *fiber.Ctx) error {
 // @Param X-User header string true "Owner of the game"
 // @Param game body CreateGameRequest true "New Game data"
 // @Success 200 {object} models.Game
-// @Router /api/games [post]
+// @Router /games [post]
 func handleCreateGame(c *fiber.Ctx) error {
 	owner := fmt.Sprintf("%s", c.Locals(auth.ContextKey))
 	createGameRequest := new(CreateGameRequest)
@@ -126,7 +126,7 @@ func handleCreateGame(c *fiber.Ctx) error {
 // @Param X-User header string true "User to join the game"
 // @Param id path string true "Game ID"
 // @Success 200
-// @Router /api/games/{id}/join [post]
+// @Router /games/{id}/join [post]
 func handleJoinGame(c *fiber.Ctx) error {
 	player := fmt.Sprintf("%s", c.Locals(auth.ContextKey))
 	playerObject := c.Locals(auth.ObjectKey).(*models.User)
@@ -179,7 +179,7 @@ func handleJoinGame(c *fiber.Ctx) error {
 // @Param X-User header string true "User to leave the game"
 // @Param id path string true "Game ID"
 // @Success 200
-// @Router /api/games/{id}/leave [post]
+// @Router /games/{id}/leave [post]
 func handleLeaveGame(c *fiber.Ctx) error {
 	player := fmt.Sprintf("%s", c.Locals(auth.ContextKey))
 	playerObject := c.Locals(auth.ObjectKey).(*models.User)
@@ -236,7 +236,7 @@ func handleLeaveGame(c *fiber.Ctx) error {
 // @Param X-User header string true "Owner of the game to be started"
 // @Param id path string true "Game ID"
 // @Success 200
-// @Router /api/games/{id}/start [post]
+// @Router /games/{id}/start [post]
 func handleStartGame(c *fiber.Ctx) error {
 	playerObject := c.Locals(auth.ObjectKey).(*models.User)
 
@@ -318,7 +318,7 @@ func ValidateNewTurnRequest(turnRequest NewTurnRequest) []*ErrorResponse {
 // @Param turn body NewTurnRequest true "New turn data"
 // @Param id path string true "Game ID"
 // @Success 200
-// @Router /api/games/{id}/turn [post]
+// @Router /games/{id}/turn [post]
 func handleNextTurn(c *fiber.Ctx) error {
 	//playerObject := c.Locals(auth.ObjectKey).(*models.User)
 	newTurnRequest := new(NewTurnRequest)
@@ -346,7 +346,7 @@ func handleNextTurn(c *fiber.Ctx) error {
 // @Produce json
 // @Param id path string true "Game ID"
 // @Success 200
-// @Router /api/games/{id}/stop [post]
+// @Router /games/{id}/stop [post]
 func handleStopGame(c *fiber.Ctx) error {
 	playerObject := c.Locals(auth.ObjectKey).(*models.User)
 

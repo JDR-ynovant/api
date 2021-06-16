@@ -20,7 +20,7 @@ func (HealthcheckRouteHandler) Register(app fiber.Router) {
 // @Accept  json
 // @Produce  json
 // @Success 200
-// @Router /api/healthcheck [get]
+// @Router /healthcheck [get]
 func handleHealthcheck(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusOK)
 }
