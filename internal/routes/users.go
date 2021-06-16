@@ -14,12 +14,33 @@ type UserRouteHandler struct{}
 func (UserRouteHandler) Register(app fiber.Router) {
 	usersApi := app.Group("/users")
 
-	usersApi.Get("/:id?", getUser)
+	usersApi.Get("/", getUsers)
+	usersApi.Get("/:id", getUser)
 	usersApi.Post("", createUser)
 	usersApi.Put("/:id", updateUser)
 	usersApi.Delete("/:id", deleteUser)
 
 	log.Println("Registered users api group.")
+}
+
+// getUsers godoc
+// @Summary List users
+// @Description Get all users
+// @Tags users
+// @Accept  json
+// @Produce  json
+// @Success 200 array []models.User
+// @Router /users [get]
+func getUsers(c *fiber.Ctx) error {
+	ur := repository.NewUserRepository()
+	users, err := ur.FindAll()
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	return c.JSON(users)
 }
 
 // getUser godoc
@@ -34,26 +55,11 @@ func (UserRouteHandler) Register(app fiber.Router) {
 func getUser(c *fiber.Ctx) error {
 	ur := repository.NewUserRepository()
 
-	if c.Params("id") == "" {
-		users, err := ur.FindAll()
-		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"message": err.Error(),
-			})
-		}
-
-		return c.JSON(users)
-	}
-
 	user, err := ur.FindOneById(c.Params("id"))
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"message": err.Error(),
 		})
-	}
-
-	if user == nil {
-		return c.SendStatus(fiber.StatusNotFound)
 	}
 
 	return c.JSON(user)
