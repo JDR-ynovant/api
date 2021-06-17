@@ -11,6 +11,9 @@ jobs:
   build:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
+    outputs:
+      new_tag: ${{ steps.github_tag.outputs.new_tag }}
+
     steps:
       - uses: actions/checkout@v2
         with:
@@ -45,21 +48,23 @@ jobs:
           go get -u github.com/swaggo/swag/cmd/swag
           swag init --parseDependency
 
+      - name: bump version and push tag
+        uses: mathieudutour/github-tag-action@v4.6
+        id: github_tag
+        with:
+          github_token: ${{ secrets.GHCR_TOKEN }}
+
       - name: build and push image
         uses: docker/build-push-action@v2
         with:
           context: .
           file: Dockerfile
           push: true
-          tags: ghcr.io/jdr-ynovant/candy-fight-api:latest
+          tags: |
+            ghcr.io/jdr-ynovant/candy-fight-api:latest
+            ghcr.io/jdr-ynovant/candy-fight-api:${{ steps.github_tag.outputs.new_tag }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
-
-      - name: bump version and push tag
-        uses: mathieudutour/github-tag-action@v4.6
-        id: github_tag
-        with:
-          github_token: ${{ secrets.GHCR_TOKEN }}
 
       - name: move cache
         run: |
@@ -70,15 +75,10 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: install kubectl
-        uses: azure/setup-kubectl@v1
-
-      - name: write kubeconfig
-        uses: DamianReeves/write-file-action@v1.0
+      - name: rollout new version
+        uses: peter-evans/repository-dispatch@v1
         with:
-          path: /tmp/kubeconfig
-          contents: ${{ secrets.K8S_CONFIG }}
-          write-mode: overwrite
-
-      - name: rollout deployments
-        run: kubectl -n candy-fight rollout restart deployments candy-fight-api-dp --kubeconfig="/tmp/kubeconfig"
+          token: ${{ secrets.GHCR_TOKEN }}
+          repository: JDR-ynovant/system
+          event-type: rollout
+          client-payload: '{"tag": "${{ needs.build.outputs.new_tag }}", "service": "api"}'
