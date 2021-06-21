@@ -29,6 +29,24 @@ const (
 	GAME_STATUS_FINISHED GameStatus = "finished"
 )
 
+func (g Game) GetPlayer(playerId primitive.ObjectID) *Character {
+	for _, player := range g.Players {
+		if player.Id == playerId {
+			return &player
+		}
+	}
+	return nil
+}
+
+func (g Game) GetObject(objectID primitive.ObjectID) *Object {
+	for _, object := range g.Objects {
+		if object.Id == objectID {
+			return &object
+		}
+	}
+	return nil
+}
+
 func (g Game) HasPlayer(userId primitive.ObjectID) bool {
 	for _, player := range g.Players {
 		if player.User == userId {

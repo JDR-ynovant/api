@@ -23,7 +23,7 @@ const (
 type Action struct {
 	Type ActionType `json:"type,omitempty"`
 
-	// MoveAction && AttackAction
+	// MoveAction
 	TargetX int `json:"targetX,omitempty"`
 	TargetY int `json:"targetY,omitempty"`
 	// AttackAction & UsageAction

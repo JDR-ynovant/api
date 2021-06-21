@@ -56,40 +56,30 @@ func (PushRouteHandler) Register(app fiber.Router) {
 func handleSubscribe(c *fiber.Ctx) error {
 	authUser := fmt.Sprintf("%s", c.Locals(auth.ContextKey))
 	if authUser == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": fmt.Sprintf("missing %s header.", auth.Header),
-		})
+		return jsonError(c, fiber.StatusBadRequest, fmt.Sprintf("missing %s header.", auth.Header))
 	}
 
 	ur := repository.NewUserRepository()
 	subscription := new(SubscriptionRequest)
 	if err := c.BodyParser(subscription); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return jsonError(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	validationErrors := ValidateStruct(*subscription)
 	if validationErrors != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": validationErrors,
-		})
+		return jsonError(c, fiber.StatusBadRequest, validationErrors)
 	}
 
 	fetchedUser, err := ur.FindOneById(authUser)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return jsonError(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	fetchedUser.Subscription = subscription.Subscription
 	err = ur.Update(fetchedUser.Id.Hex(), *fetchedUser)
 
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return jsonError(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	return c.SendStatus(fiber.StatusOK)

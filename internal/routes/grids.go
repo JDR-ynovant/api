@@ -28,9 +28,7 @@ func handleGetGrid(c *fiber.Ctx) error {
 
 	grid, err := gr.FindOneById(c.Params("id"))
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return jsonError(c, fiber.StatusNotFound, err.Error())
 	}
 
 	return c.JSON(grid)

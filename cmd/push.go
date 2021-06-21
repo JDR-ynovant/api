@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"github.com/JDR-ynovant/api/internal/repository"
-	"github.com/JDR-ynovant/api/internal/service"
+	"github.com/JDR-ynovant/api/internal/service/webpush"
 	"github.com/spf13/cobra"
 	"log"
 )
@@ -30,7 +30,7 @@ func executePushCommand(userId string) {
 		log.Fatal("missing user subscription")
 	}
 
-	resp, err := service.SendNotification(&user.Subscription)
+	resp, err := webpush.SendNotification(&user.Subscription, "Test")
 	if err != nil {
 		log.Fatal(err)
 	}

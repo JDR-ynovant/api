@@ -2,6 +2,7 @@ package cmd
 
 import (
 	_ "github.com/JDR-ynovant/api/docs"
+	"github.com/JDR-ynovant/api/internal"
 	"github.com/JDR-ynovant/api/internal/middleware/auth"
 	"github.com/JDR-ynovant/api/internal/repository"
 	"github.com/JDR-ynovant/api/internal/routes"
@@ -47,4 +48,5 @@ var serveCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(serveCmd)
+	internal.GetStrings()
 }

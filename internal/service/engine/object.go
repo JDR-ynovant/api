@@ -45,7 +45,7 @@ func hasObjectAtCoordinates(objects []models.Object, x int, y int) bool {
 func randomObject(x int, y int) models.Object {
 	return models.Object{
 		Name:      randomFromArray(getAvailableObjectNames()),
-		Type:      randomFromArray(getAvailableObjectTypes()),
+		Type:      randomFromArrayObjectType(getAvailableObjectTypes()),
 		Value:     randomObjectValue(),
 		PositionX: x,
 		PositionY: y,
@@ -57,12 +57,16 @@ func getAvailableObjectNames() []string {
 	return []string{"Sugar Cane", "Candy", "Spear of sugar", "Liquid Sugar"}
 }
 
-func getAvailableObjectTypes() []string {
-	return []string{"weapon", "potion"}
+func getAvailableObjectTypes() []models.ObjectType {
+	return []models.ObjectType{models.OBJECT_TYPE_WEAPON, models.OBJECT_TYPE_POTION}
 }
 
 func randomFromArray(strings []string) string {
 	return strings[rand.Intn(len(strings))]
+}
+
+func randomFromArrayObjectType(objectTypes []models.ObjectType) models.ObjectType {
+	return objectTypes[rand.Intn(len(objectTypes))]
 }
 
 func randomObjectValue() int {

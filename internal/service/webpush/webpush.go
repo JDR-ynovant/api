@@ -1,6 +1,7 @@
-package service
+package webpush
 
 import (
+	"errors"
 	"github.com/JDR-ynovant/api/internal"
 	"github.com/JDR-ynovant/api/internal/models"
 	"github.com/JDR-ynovant/api/internal/repository"
@@ -12,7 +13,7 @@ import (
 	"net/http"
 )
 
-func SendNotificationToPlayers(g *models.Game) error {
+func SendNotificationToGame(g *models.Game, message string) error {
 	playerIds := make([]primitive.ObjectID, 0)
 	for _, player := range g.Players {
 		playerIds = append(playerIds, player.Id)
@@ -26,11 +27,7 @@ func SendNotificationToPlayers(g *models.Game) error {
 	}
 
 	for _, user := range users {
-		if user.Subscription.Endpoint == "" {
-			continue
-		}
-
-		_, err = SendNotification(&user.Subscription)
+		err = SendNotificationToPlayer(user, message)
 		if err != nil {
 			log.Println(err)
 		}
@@ -38,10 +35,36 @@ func SendNotificationToPlayers(g *models.Game) error {
 	return nil
 }
 
-func SendNotification(subscription *webpush.Subscription) (*http.Response, error) {
+func SendNotificationToPlayers(playersIds []primitive.ObjectID, message string) error {
+	ur := repository.NewUserRepository()
+	users, err := ur.FindAllBy(bson.M{"_id": playersIds})
+
+	if err != nil {
+		return err
+	}
+
+	for _, user := range users {
+		err = SendNotificationToPlayer(user, message)
+		if err != nil {
+			log.Println(err)
+		}
+	}
+	return nil
+}
+
+func SendNotificationToPlayer(user models.User, message string) error {
+	if user.Subscription.Endpoint == "" {
+		return errors.New("missing subscription")
+	}
+
+	_, err := SendNotification(&user.Subscription, message)
+	return err
+}
+
+func SendNotification(subscription *webpush.Subscription, message string) (*http.Response, error) {
 	config := internal.GetConfig()
 
-	resp, err := webpush.SendNotification([]byte("Test"), subscription, &webpush.Options{
+	resp, err := webpush.SendNotification([]byte(message), subscription, &webpush.Options{
 		Subscriber:      "g.marmo@hotmail.fr",
 		VAPIDPublicKey:  config.VapidPublicKey,
 		VAPIDPrivateKey: config.VapidPrivateKey,

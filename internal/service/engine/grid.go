@@ -38,3 +38,16 @@ func randomCoordinates(width int, height int) (int, int) {
 	rand.Seed(time.Now().Unix())
 	return rand.Intn(width), rand.Intn(height)
 }
+
+type RangeCalculation struct {
+	basePositionX   int
+	basePositionY   int
+	targetPositionX int
+	targetPositionY int
+	rangeLimit      int
+}
+
+func IsInRange(r RangeCalculation, strategy Strategy) bool {
+	handler := GetGridStrategyHandler(strategy, r)
+	return handler.PositionIsInRange()
+}

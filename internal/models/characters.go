@@ -10,3 +10,14 @@ type Character struct {
 	PositionX  int                `json:"positionX,omitempty"`
 	PositionY  int                `json:"positionY,omitempty"`
 }
+
+func (c Character) HasItem(id primitive.ObjectID) bool {
+	hasItem := false
+	for _, object := range c.Inventory {
+		if object.Id == id {
+			hasItem = true
+		}
+	}
+
+	return hasItem
+}

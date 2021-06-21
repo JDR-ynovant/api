@@ -35,9 +35,7 @@ func getUsers(c *fiber.Ctx) error {
 	ur := repository.NewUserRepository()
 	users, err := ur.FindAll()
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return jsonError(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(users)
@@ -57,9 +55,7 @@ func getUser(c *fiber.Ctx) error {
 
 	user, err := ur.FindOneById(c.Params("id"))
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return jsonError(c, fiber.StatusNotFound, err.Error())
 	}
 
 	return c.JSON(user)
@@ -80,16 +76,12 @@ func createUser(c *fiber.Ctx) error {
 		Games: make([]primitive.ObjectID, 0),
 	}
 	if err := c.BodyParser(&user); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return jsonError(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	u, err := ur.Create(&user)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return jsonError(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(*u)
@@ -135,31 +127,23 @@ func updateUser(c *fiber.Ctx) error {
 
 	updateUserRequest := new(UpdateUserRequest)
 	if err := c.BodyParser(updateUserRequest); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return jsonError(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	validationErrors := ValidateUpdateUserRequest(*updateUserRequest)
 	if validationErrors != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": validationErrors,
-		})
+		return jsonError(c, fiber.StatusBadRequest, validationErrors)
 	}
 
 	user, err := ur.FindOneById(c.Params("id"))
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return jsonError(c, fiber.StatusNotFound, err.Error())
 	}
 
 	user.Name = updateUserRequest.Name
 	err = ur.Update(c.Params("id"), *user)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return jsonError(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(updateUserRequest)
@@ -179,9 +163,7 @@ func deleteUser(c *fiber.Ctx) error {
 
 	err := ur.Delete(c.Params("id"))
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return jsonError(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	return c.SendStatus(fiber.StatusNoContent)

@@ -63,9 +63,7 @@ func handleGetGame(c *fiber.Ctx) error {
 
 	game, err := gr.FindOneById(c.Params("id"))
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return jsonError(c, fiber.StatusNotFound, err.Error())
 	}
 
 	return c.JSON(game)
@@ -85,16 +83,12 @@ func handleCreateGame(c *fiber.Ctx) error {
 	owner := fmt.Sprintf("%s", c.Locals(auth.ContextKey))
 	createGameRequest := new(CreateGameRequest)
 	if err := c.BodyParser(createGameRequest); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return jsonError(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	validationErrors := ValidateCreateGameRequest(*createGameRequest)
 	if validationErrors != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": validationErrors,
-		})
+		return jsonError(c, fiber.StatusBadRequest, validationErrors)
 	}
 
 	gr := repository.NewGameRepository()
@@ -102,16 +96,12 @@ func handleCreateGame(c *fiber.Ctx) error {
 
 	createdGame, err := gr.Create(game)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return jsonError(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	err = gr.AttachUser(owner, createdGame.Id.Hex())
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return jsonError(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	return c.Status(fiber.StatusOK).JSON(createdGame)
@@ -134,15 +124,11 @@ func handleJoinGame(c *fiber.Ctx) error {
 	gr := repository.NewGameRepository()
 	game, err := gr.FindOneById(c.Params("id"))
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return jsonError(c, fiber.StatusNotFound, err.Error())
 	}
 
 	if game.Status != models.GAME_STATUS_CREATED {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "game has already started",
-		})
+		return jsonError(c, fiber.StatusBadRequest, "game has already started")
 	}
 
 	playerId, _ := primitive.ObjectIDFromHex(player)
@@ -152,18 +138,14 @@ func handleJoinGame(c *fiber.Ctx) error {
 
 		err = gr.Update(c.Params("id"), *game)
 		if err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"message": err.Error(),
-			})
+			return jsonError(c, fiber.StatusBadRequest, err.Error())
 		}
 
 		ur := repository.NewUserRepository()
 		playerObject.Games = append(playerObject.Games, game.Id)
 		err = ur.Update(playerId.Hex(), *playerObject)
 		if err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"message": err.Error(),
-			})
+			return jsonError(c, fiber.StatusBadRequest, err.Error())
 		}
 	}
 
@@ -187,21 +169,15 @@ func handleLeaveGame(c *fiber.Ctx) error {
 	gr := repository.NewGameRepository()
 	game, err := gr.FindOneById(c.Params("id"))
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return jsonError(c, fiber.StatusNotFound, err.Error())
 	}
 
 	if game.Status == models.GAME_STATUS_FINISHED {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "game has finished",
-		})
+		return jsonError(c, fiber.StatusBadRequest, "game has finished")
 	}
 
 	if game.Owner == playerObject.Id {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "owner cannot leave its game",
-		})
+		return jsonError(c, fiber.StatusBadRequest, "owner cannot leave its game")
 	}
 
 	playerId, _ := primitive.ObjectIDFromHex(player)
@@ -209,18 +185,14 @@ func handleLeaveGame(c *fiber.Ctx) error {
 		game.RemovePlayer(playerObject.Id)
 		err = gr.Update(c.Params("id"), *game)
 		if err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"message": err.Error(),
-			})
+			return jsonError(c, fiber.StatusBadRequest, err.Error())
 		}
 
 		ur := repository.NewUserRepository()
 		playerObject.RemoveGame(game.Id)
 		err = ur.Update(playerId.Hex(), *playerObject)
 		if err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"message": err.Error(),
-			})
+			return jsonError(c, fiber.StatusBadRequest, err.Error())
 		}
 	}
 
@@ -241,33 +213,22 @@ func handleStartGame(c *fiber.Ctx) error {
 	playerObject := c.Locals(auth.ObjectKey).(*models.User)
 
 	gameId := c.Params("id")
-	if gameId == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "missing game ID",
-		})
-	}
 
 	gr := repository.NewGameRepository()
 	game, err := gr.FindOneById(gameId)
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"message": "Game ID not found",
-		})
+		return jsonError(c, fiber.StatusNotFound, "Game ID not found")
 	}
 
 	if game.Owner != playerObject.Id {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"message": "only owner can start game its",
-		})
+		return jsonError(c, fiber.StatusBadRequest, "only owner can start game its")
 	}
 
 	grr := repository.NewGridRepository()
 	grid := engine.GenerateGrid(engine.DEFAULT_GRID_WIDTH, engine.DEFAULT_GRID_HEIGHT)
 	err = grr.Create(grid)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return jsonError(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	objects := engine.GenerateObjects(grid, game.PlayerCount)
@@ -278,9 +239,7 @@ func handleStartGame(c *fiber.Ctx) error {
 
 	err = gr.Update(gameId, *game)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return jsonError(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	return c.SendStatus(fiber.StatusOK)
@@ -309,6 +268,19 @@ func ValidateNewTurnRequest(turnRequest NewTurnRequest) []*ErrorResponse {
 	return errors
 }
 
+func BuildFromRequest(turnRequest NewTurnRequest, game models.Game) *models.Turn {
+	turn := models.Turn{
+		Id:         primitive.NewObjectID(),
+		Actions:    turnRequest.Actions,
+		X:          turnRequest.X,
+		Y:          turnRequest.Y,
+		Player:     turnRequest.Player,
+		TurnNumber: game.TurnNumber + 1,
+	}
+
+	return &turn
+}
+
 // handleNextTurn godoc
 // @Summary Play a games turn
 // @Description Play the given turn of the given game.
@@ -321,18 +293,33 @@ func ValidateNewTurnRequest(turnRequest NewTurnRequest) []*ErrorResponse {
 // @Router /games/{id}/turn [post]
 func handleNextTurn(c *fiber.Ctx) error {
 	//playerObject := c.Locals(auth.ObjectKey).(*models.User)
+	gr := repository.NewGameRepository()
+	game, err := gr.FindOneById(c.Params("id"))
+	if err != nil {
+		return jsonError(c, fiber.StatusNotFound, "Game ID not found")
+	}
+
 	newTurnRequest := new(NewTurnRequest)
 	if err := c.BodyParser(newTurnRequest); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return jsonError(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	validationErrors := ValidateNewTurnRequest(*newTurnRequest)
 	if validationErrors != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": validationErrors,
-		})
+		return jsonError(c, fiber.StatusBadRequest, validationErrors)
+	}
+
+	newTurn := BuildFromRequest(*newTurnRequest, *game)
+	err = engine.PlayTurn(newTurn, game)
+
+	if err != nil {
+		return jsonError(c, fiber.StatusInternalServerError, err.Error())
+	}
+
+	err = gr.Update(game.Id.Hex(), *game)
+
+	if err != nil {
+		return jsonError(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	return c.SendStatus(fiber.StatusOK)
@@ -352,31 +339,23 @@ func handleStopGame(c *fiber.Ctx) error {
 
 	gameId := c.Params("id")
 	if gameId == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "missing game ID",
-		})
+		return jsonError(c, fiber.StatusBadRequest, "missing game ID")
 	}
 
 	gr := repository.NewGameRepository()
 	game, err := gr.FindOneById(gameId)
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"message": "Game ID not found",
-		})
+		return jsonError(c, fiber.StatusNotFound, "Game ID not found")
 	}
 
 	if game.Owner != playerObject.Id {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"message": "only owner can start game its",
-		})
+		return jsonError(c, fiber.StatusBadRequest, "only owner can start game its")
 	}
 
 	game.Status = models.GAME_STATUS_FINISHED
 	err = gr.Update(gameId, *game)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return jsonError(c, fiber.StatusInternalServerError, err.Error())
 	}
 
 	return c.SendStatus(fiber.StatusOK)
