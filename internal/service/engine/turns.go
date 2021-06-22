@@ -66,11 +66,52 @@ func getDeadPlayersThisTurn(game *models.Game) []primitive.ObjectID {
 }
 
 func calculateNewPlaying(game *models.Game) primitive.ObjectID {
-	// @todo
-	// maybe a fifo loop ?
-	//
-	// or calculate based on last turns
-	// array of excluded with current + dead players then rewind turns based on remaining players
-	// and a map with pointer to player ID and last turn number played, once full get lowest turn number
-	return primitive.ObjectID{}
+	config := internal.GetConfig()
+	turnCharacterMap := make(map[primitive.ObjectID]int)
+	excludedCharacter := make([]primitive.ObjectID, 0)
+	excludedCharacter = append(excludedCharacter, game.Playing)
+
+	// exclude dead players
+	for _, character := range game.Players {
+		if character.BloodSugar == config.RuleBloodSugarCap {
+			excludedCharacter = append(excludedCharacter, character.Id)
+		}
+	}
+
+	// init turnCharacterMap with all non excluded players
+	for _, character := range game.Players {
+		if isPlayerExcluded := inArray(excludedCharacter, character.Id); !isPlayerExcluded {
+			turnCharacterMap[character.Id] = -1
+		}
+	}
+
+	for i := len(game.Turns) - 1; i >= 0; i-- {
+		//fmt.Printf("inspecting turn : %v for game : %v\n", i, game.Id)
+		turn := game.Turns[i]
+		if isPlayerExcluded := inArray(excludedCharacter, turn.Player); !isPlayerExcluded {
+			turnCharacterMap[turn.Player] = turn.TurnNumber
+		}
+	}
+
+	// iterate over map and return lowest turn number
+	selectedNewPlaying := game.Playing
+	lowestTurnPlayed := game.TurnNumber
+	for id, lastTurnPlayed := range turnCharacterMap {
+		if lastTurnPlayed < lowestTurnPlayed {
+			selectedNewPlaying = id
+			lowestTurnPlayed = lastTurnPlayed
+		}
+		//fmt.Printf("calculateNewPlaying: player %v : last turn %v; selected = %v\n", id, lastTurnPlayed, selectedNewPlaying)
+	}
+
+	return selectedNewPlaying
+}
+
+func inArray(array []primitive.ObjectID, needle primitive.ObjectID) bool {
+	for _, id := range array {
+		if id == needle {
+			return true
+		}
+	}
+	return false
 }
