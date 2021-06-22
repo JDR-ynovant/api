@@ -6,9 +6,10 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func CreateCharacter(user primitive.ObjectID) *models.Character {
+func CreateCharacter(user primitive.ObjectID, name string) *models.Character {
 	character := models.Character{
 		Id:         primitive.NewObjectID(),
+		Name:       name,
 		User:       user,
 		BloodSugar: 0,
 		Inventory:  make([]models.Object, 0),

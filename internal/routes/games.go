@@ -80,7 +80,7 @@ func handleGetGame(c *fiber.Ctx) error {
 // @Success 200 {object} models.Game
 // @Router /games [post]
 func handleCreateGame(c *fiber.Ctx) error {
-	owner := fmt.Sprintf("%s", c.Locals(auth.ContextKey))
+	owner := c.Locals(auth.ObjectKey).(*models.User)
 	createGameRequest := new(CreateGameRequest)
 	if err := c.BodyParser(createGameRequest); err != nil {
 		return jsonError(c, fiber.StatusInternalServerError, err.Error())
@@ -99,7 +99,7 @@ func handleCreateGame(c *fiber.Ctx) error {
 		return jsonError(c, fiber.StatusInternalServerError, err.Error())
 	}
 
-	err = gr.AttachUser(owner, createdGame.Id.Hex())
+	err = gr.AttachUser(owner.Id.Hex(), createdGame.Id.Hex())
 	if err != nil {
 		return jsonError(c, fiber.StatusInternalServerError, err.Error())
 	}
@@ -118,7 +118,6 @@ func handleCreateGame(c *fiber.Ctx) error {
 // @Success 200
 // @Router /games/{id}/join [post]
 func handleJoinGame(c *fiber.Ctx) error {
-	player := fmt.Sprintf("%s", c.Locals(auth.ContextKey))
 	playerObject := c.Locals(auth.ObjectKey).(*models.User)
 
 	gr := repository.NewGameRepository()
@@ -131,9 +130,8 @@ func handleJoinGame(c *fiber.Ctx) error {
 		return jsonError(c, fiber.StatusBadRequest, "game has already started")
 	}
 
-	playerId, _ := primitive.ObjectIDFromHex(player)
-	if !game.HasPlayer(playerId) {
-		character := engine.CreateCharacter(playerId)
+	if !game.HasPlayer(playerObject.Id) {
+		character := engine.CreateCharacter(playerObject.Id, playerObject.Name)
 		game.Players = append(game.Players, *character)
 
 		err = gr.Update(c.Params("id"), *game)
@@ -143,7 +141,7 @@ func handleJoinGame(c *fiber.Ctx) error {
 
 		ur := repository.NewUserRepository()
 		playerObject.Games = append(playerObject.Games, game.Id)
-		err = ur.Update(playerId.Hex(), *playerObject)
+		err = ur.Update(playerObject.Id.Hex(), *playerObject)
 		if err != nil {
 			return jsonError(c, fiber.StatusBadRequest, err.Error())
 		}

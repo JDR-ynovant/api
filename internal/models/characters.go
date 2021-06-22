@@ -5,6 +5,7 @@ import "go.mongodb.org/mongo-driver/bson/primitive"
 type Character struct {
 	Id         primitive.ObjectID `bson:"_id" json:"id,omitempty"`
 	User       primitive.ObjectID `json:"user,omitempty"`
+	Name       string             `json:"name,omitempty"`
 	BloodSugar int                `json:"bloodSugar"`
 	Inventory  []Object           `json:"inventory"`
 	PositionX  int                `json:"positionX"`
