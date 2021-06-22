@@ -69,7 +69,7 @@ func (m MoveActionHandler) IsLegit() (bool, error) {
 
 	targetCell := grid.CellAtCoordinates(m.action.TargetX, m.action.TargetY)
 
-	return IsInRange(r, STRATEGY_RANGE) && targetCell.Type == models.CELL_TYPE_WALKABLE, nil
+	return IsInRange(r, STRATEGY_GRID_RANGE) && targetCell.Type == models.CELL_TYPE_WALKABLE, nil
 }
 
 // ================== AttackActionHandler

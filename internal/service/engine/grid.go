@@ -40,6 +40,7 @@ func randomCoordinates(width int, height int) (int, int) {
 }
 
 type RangeCalculation struct {
+	grid            *models.Grid
 	basePositionX   int
 	basePositionY   int
 	targetPositionX int
