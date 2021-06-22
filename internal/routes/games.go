@@ -234,6 +234,9 @@ func handleStartGame(c *fiber.Ctx) error {
 	objects := engine.GenerateObjects(grid, game.PlayerCount)
 	game.Objects = objects
 
+	players := engine.GeneratePlayersPosition(*grid, *game)
+	game.Players = players
+
 	game.Grid = grid.Id
 	game.Status = models.GAME_STATUS_STARTED
 

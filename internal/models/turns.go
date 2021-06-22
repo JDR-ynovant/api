@@ -5,10 +5,10 @@ import "go.mongodb.org/mongo-driver/bson/primitive"
 type Turn struct {
 	Id         primitive.ObjectID `bson:"_id" json:"id,omitempty"`
 	Actions    []Action           `json:"actions,omitempty"`
-	X          int                `json:"x,omitempty"`
-	Y          int                `json:"y,omitempty"`
+	X          int                `json:"x"`
+	Y          int                `json:"y"`
 	Player     primitive.ObjectID `json:"player,omitempty"`
-	TurnNumber int                `json:"turnNumber,omitempty"`
+	TurnNumber int                `json:"turnNumber"`
 }
 
 type ActionType string

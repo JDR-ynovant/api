@@ -7,8 +7,8 @@ type Character struct {
 	User       primitive.ObjectID `json:"user,omitempty"`
 	BloodSugar int                `json:"bloodSugar"`
 	Inventory  []Object           `json:"inventory"`
-	PositionX  int                `json:"positionX,omitempty"`
-	PositionY  int                `json:"positionY,omitempty"`
+	PositionX  int                `json:"positionX"`
+	PositionY  int                `json:"positionY"`
 }
 
 func (c Character) HasItem(id primitive.ObjectID) bool {

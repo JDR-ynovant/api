@@ -8,10 +8,10 @@ type Object struct {
 	Id        primitive.ObjectID `bson:"_id" json:"id,omitempty"`
 	Name      string             `json:"name,omitempty"`
 	Type      ObjectType         `json:"type,omitempty"`
-	Value     int                `json:"value,omitempty"`
-	PositionX int                `json:"positionX,omitempty"`
-	PositionY int                `json:"positionY,omitempty"`
-	Picked    bool               `json:"picked,omitempty"`
+	Value     int                `json:"value"`
+	PositionX int                `json:"positionX"`
+	PositionY int                `json:"positionY"`
+	Picked    bool               `json:"picked"`
 }
 
 const (

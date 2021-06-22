@@ -2,6 +2,7 @@ package engine
 
 import (
 	"github.com/JDR-ynovant/api/internal/models"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"math"
 	"math/rand"
 	"time"
@@ -44,6 +45,7 @@ func hasObjectAtCoordinates(objects []models.Object, x int, y int) bool {
 
 func randomObject(x int, y int) models.Object {
 	return models.Object{
+		Id:        primitive.NewObjectID(),
 		Name:      randomFromArray(getAvailableObjectNames()),
 		Type:      randomFromArrayObjectType(getAvailableObjectTypes()),
 		Value:     randomObjectValue(),

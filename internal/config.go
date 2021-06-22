@@ -24,6 +24,8 @@ type Configuration struct {
 	RuleMoveRange     int
 	RuleBaseDamage    int
 	RuleBloodSugarCap int
+	RuleWalkableQuota uint
+	RuleObstacleQuota uint
 	// Cors policy
 	CorsAllowOrigins string
 	CorsAllowHeaders string
@@ -49,6 +51,8 @@ func InitConfig() {
 	attackRange, _ := strconv.Atoi(getEnv("CANDY_FIGHT_RULE_ATTACK_RANGE", "1"))
 	baseDamage, _ := strconv.Atoi(getEnv("CANDY_FIGHT_RULE_BASE_DAMAGE", "1"))
 	maxLife, _ := strconv.Atoi(getEnv("CANDY_FIGHT_RULE_BLOOD_SUGAR_CAP", "10"))
+	walkableQuota, _ := strconv.ParseUint(getEnv("CANDY_FIGHT_RULE_WALKABLE_QUOTA", "9"), 10, 64)
+	obstacleQuota, _ := strconv.ParseUint(getEnv("CANDY_FIGHT_RULE_OBSTACLE_QUOTA", "2"), 10, 64)
 
 	config = Configuration{
 		DbHost:            getEnv("DB_HOST", "localhost"),
@@ -63,6 +67,8 @@ func InitConfig() {
 		RuleMoveRange:     attackRange,
 		RuleBaseDamage:    baseDamage,
 		RuleBloodSugarCap: maxLife,
+		RuleWalkableQuota: uint(walkableQuota),
+		RuleObstacleQuota: uint(obstacleQuota),
 		CorsAllowOrigins:  getEnv("CORS_ALLOW_ORIGINS", "*"),
 		CorsAllowHeaders:  getEnv("CORS_ALLOW_HEADERS", ""),
 		CorsAllowMethods:  getEnv("CORS_ALLOW_METHODS", "GET,POST,HEAD,PUT,DELETE,OPTIONS"),

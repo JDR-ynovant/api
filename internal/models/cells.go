@@ -1,8 +1,8 @@
 package models
 
 type Cell struct {
-	X      int      `json:"x,omitempty"`
-	Y      int      `json:"y,omitempty"`
+	X      int      `json:"x"`
+	Y      int      `json:"y"`
 	Type   CellType `json:"type,omitempty"`
 	Sprite string   `json:"sprite,omitempty"`
 }
