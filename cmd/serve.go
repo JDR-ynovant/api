@@ -8,12 +8,14 @@ import (
 	"github.com/JDR-ynovant/api/internal/routes"
 	swagger "github.com/arsmn/fiber-swagger/v2"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/spf13/cobra"
 	"log"
 )
 
 func executeServeCommand() {
+	config := internal.GetConfig()
 	handlers := []routes.RouteHandler{
 		routes.UserRouteHandler{},
 		routes.PushRouteHandler{},
@@ -23,6 +25,11 @@ func executeServeCommand() {
 	}
 	app := fiber.New()
 
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: config.CorsAllowOrigins,
+		AllowHeaders: config.CorsAllowHeaders,
+		AllowMethods: config.CorsAllowMethods,
+	}))
 	app.Use(auth.NewAuthHeaderHandler())
 
 	api := app.Group("/api", logger.New())

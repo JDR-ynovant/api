@@ -24,6 +24,10 @@ type Configuration struct {
 	RuleMoveRange     int
 	RuleBaseDamage    int
 	RuleBloodSugarCap int
+	// Cors policy
+	CorsAllowOrigins string
+	CorsAllowHeaders string
+	CorsAllowMethods string
 }
 
 var config Configuration
@@ -59,6 +63,9 @@ func InitConfig() {
 		RuleMoveRange:     attackRange,
 		RuleBaseDamage:    baseDamage,
 		RuleBloodSugarCap: maxLife,
+		CorsAllowOrigins:  getEnv("CORS_ALLOW_ORIGINS", "*"),
+		CorsAllowHeaders:  getEnv("CORS_ALLOW_HEADERS", ""),
+		CorsAllowMethods:  getEnv("CORS_ALLOW_METHODS", "GET,POST,HEAD,PUT,DELETE,OPTIONS"),
 	}
 }
 
