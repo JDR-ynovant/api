@@ -9,6 +9,7 @@ import (
 type Strings struct {
 	NotificationPlayerIsDead string `yaml:"notification_player_is_dead"`
 	NotificationPlayerTurn   string `yaml:"notification_player_turn"`
+	NotificationPlayerWin    string `yaml:"notification_player_win"`
 }
 
 var strings Strings

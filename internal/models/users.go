@@ -9,7 +9,7 @@ type User struct {
 	Id           primitive.ObjectID   `bson:"_id" json:"id,omitempty"`
 	Name         string               `json:"name,omitempty"`
 	Subscription webpush.Subscription `json:"-"`
-	Games        []primitive.ObjectID `json:"games,omitempty"`
+	Games        []primitive.ObjectID `json:"games"`
 }
 
 func (u User) HasGameAttached(gameID string) bool {

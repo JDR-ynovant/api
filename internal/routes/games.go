@@ -29,8 +29,8 @@ func (GamesRouteHandler) Register(app fiber.Router) {
 }
 
 type CreateGameRequest struct {
-	Name        string
-	PlayerCount int
+	Name        string `validate:"required"`
+	PlayerCount int    `validate:"required"`
 }
 
 func ValidateCreateGameRequest(gameRequest CreateGameRequest) []*ErrorResponse {
@@ -246,10 +246,10 @@ func handleStartGame(c *fiber.Ctx) error {
 }
 
 type NewTurnRequest struct {
-	Actions []models.Action
-	X       int
-	Y       int
-	Player  primitive.ObjectID
+	Actions []models.Action    `validate:"required"`
+	X       int                `validate:"required"`
+	Y       int                `validate:"required"`
+	Player  primitive.ObjectID `validate:"required"`
 }
 
 func ValidateNewTurnRequest(turnRequest NewTurnRequest) []*ErrorResponse {

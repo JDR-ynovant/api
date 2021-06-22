@@ -42,6 +42,13 @@ func PlayTurn(turn *models.Turn, game *models.Game) error {
 	deadPlayers := getDeadPlayersThisTurn(game)
 	_ = webpush.SendNotificationToPlayers(deadPlayers, fmt.Sprintf(notificationStrings.NotificationPlayerIsDead, currentUser.Name))
 
+	// determine if game victory condition is reached
+	if isVictoryConditionReached(game) {
+		game.Status = models.GAME_STATUS_FINISHED
+		_ = webpush.SendNotificationToPlayer(*currentUser, notificationStrings.NotificationPlayerWin)
+		return nil
+	}
+
 	// set new playing player
 	game.Playing = calculateNewPlaying(game)
 
@@ -49,6 +56,12 @@ func PlayTurn(turn *models.Turn, game *models.Game) error {
 	_ = webpush.SendNotificationToPlayer(*currentUser, notificationStrings.NotificationPlayerTurn)
 
 	return nil
+}
+
+func isVictoryConditionReached(game *models.Game) bool {
+	// victory condition are : the playing user is the last alive
+
+	return true
 }
 
 func getDeadPlayersThisTurn(game *models.Game) []primitive.ObjectID {

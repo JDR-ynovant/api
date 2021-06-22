@@ -61,6 +61,26 @@ func getUser(c *fiber.Ctx) error {
 	return c.JSON(user)
 }
 
+type CreateUserRequest struct {
+	Name string `validate:"required"`
+}
+
+func ValidateCreateUserRequest(userRequest CreateUserRequest) []*ErrorResponse {
+	var errors []*ErrorResponse
+	validate := validator.New()
+	err := validate.Struct(userRequest)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element ErrorResponse
+			element.FailedField = err.StructNamespace()
+			element.Tag = err.Tag()
+			element.Value = err.Param()
+			errors = append(errors, &element)
+		}
+	}
+	return errors
+}
+
 // createUser godoc
 // @Summary Create a new user
 // @Description Create a new user
@@ -72,11 +92,19 @@ func getUser(c *fiber.Ctx) error {
 func createUser(c *fiber.Ctx) error {
 	ur := repository.NewUserRepository()
 
-	user := models.User{
-		Games: make([]primitive.ObjectID, 0),
-	}
-	if err := c.BodyParser(&user); err != nil {
+	createUserRequest := new(CreateUserRequest)
+	if err := c.BodyParser(createUserRequest); err != nil {
 		return jsonError(c, fiber.StatusInternalServerError, err.Error())
+	}
+
+	validationErrors := ValidateCreateUserRequest(*createUserRequest)
+	if validationErrors != nil {
+		return jsonError(c, fiber.StatusBadRequest, validationErrors)
+	}
+
+	user := models.User{
+		Name:  createUserRequest.Name,
+		Games: make([]primitive.ObjectID, 0),
 	}
 
 	u, err := ur.Create(&user)
@@ -88,7 +116,7 @@ func createUser(c *fiber.Ctx) error {
 }
 
 type UpdateUserRequest struct {
-	Name string
+	Name string `validate:"required"`
 }
 
 func ValidateUpdateUserRequest(userRequest UpdateUserRequest) []*ErrorResponse {
@@ -105,12 +133,6 @@ func ValidateUpdateUserRequest(userRequest UpdateUserRequest) []*ErrorResponse {
 		}
 	}
 	return errors
-}
-
-func FromUpdateUserRequest(updateUserRequest *UpdateUserRequest) *models.User {
-	return &models.User{
-		Name: updateUserRequest.Name,
-	}
 }
 
 // updateUser godoc
