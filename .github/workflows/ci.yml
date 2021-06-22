@@ -13,6 +13,14 @@ env:
 
 jobs:
   lint:
+    services:
+      mongodb:
+        image: mongo:bionic
+        env:
+          MONGO_INITDB_ROOT_USERNAME: candy-fight
+          MONGO_INITDB_ROOT_PASSWORD: candy-fight
+        ports:
+          - 27017:27017
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

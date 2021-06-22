@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   candy-fight-database:
-    image: mongo
+    image: mongo:bionic
     restart: always
     environment:
       MONGO_INITDB_ROOT_USERNAME: candy-fight
