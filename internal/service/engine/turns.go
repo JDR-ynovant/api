@@ -59,9 +59,23 @@ func PlayTurn(turn *models.Turn, game *models.Game) error {
 }
 
 func isVictoryConditionReached(game *models.Game) bool {
-	// victory condition are : the playing user is the last alive
+	// victory condition are :
+	// - the playing user is the last alive
+	// - ??
+	config := internal.GetConfig()
+	isRemainingCharacter := false
+	for _, character := range game.Players {
+		if character.Id == game.Playing {
+			continue
+		}
 
-	return true
+		if character.BloodSugar < config.RuleBloodSugarCap {
+			isRemainingCharacter = true
+			break
+		}
+	}
+
+	return !isRemainingCharacter
 }
 
 func getDeadPlayersThisTurn(game *models.Game) []primitive.ObjectID {
