@@ -51,7 +51,7 @@ func InitConfig() {
 	attackRange, _ := strconv.Atoi(getEnv("CANDY_FIGHT_RULE_ATTACK_RANGE", "1"))
 	baseDamage, _ := strconv.Atoi(getEnv("CANDY_FIGHT_RULE_BASE_DAMAGE", "1"))
 	maxLife, _ := strconv.Atoi(getEnv("CANDY_FIGHT_RULE_BLOOD_SUGAR_CAP", "10"))
-	walkableQuota, _ := strconv.ParseUint(getEnv("CANDY_FIGHT_RULE_WALKABLE_QUOTA", "9"), 10, 64)
+	walkableQuota, _ := strconv.ParseUint(getEnv("CANDY_FIGHT_RULE_WALKABLE_QUOTA", "11"), 10, 64)
 	obstacleQuota, _ := strconv.ParseUint(getEnv("CANDY_FIGHT_RULE_OBSTACLE_QUOTA", "2"), 10, 64)
 
 	config = Configuration{
