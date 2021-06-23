@@ -28,16 +28,16 @@ func PlayTurn(turn *models.Turn, game *models.Game) error {
 		TurnNumber: turn.TurnNumber,
 	})
 
-	for i, action := range turn.Actions {
+	for _, action := range turn.Actions {
 		actionHandler := GetActionHandler(game, &action, turn)
 
-		if isLegit, err := actionHandler.IsLegit(); !isLegit {
-			return fmt.Errorf("play turn: action is not legal : %s (action number: %v)", err, i+1)
-		}
+		//if isLegit, err := actionHandler.IsLegit(); !isLegit {
+		//	return fmt.Errorf("play turn: action is not legal : %s (action number: %v)", err, i+1)
+		//}
 
 		actionHandler.Handle()
-		player := game.GetPlayer(game.Playing)
-		fmt.Printf("play turn: action played: requested position (%v:%v), obtained (%v:%v)", action.TargetX, action.TargetY, player.PositionX, player.PositionY)
+		//player := game.GetPlayer(game.Playing)
+		//fmt.Printf("play turn: action played: requested position (%v:%v), obtained (%v:%v)", action.TargetX, action.TargetY, player.PositionX, player.PositionY)
 	}
 
 	// fetch dead player this turn for notification
