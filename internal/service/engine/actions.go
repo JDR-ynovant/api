@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"errors"
 	"github.com/JDR-ynovant/api/internal"
 	"github.com/JDR-ynovant/api/internal/models"
 	"github.com/JDR-ynovant/api/internal/repository"
@@ -69,7 +70,11 @@ func (m MoveActionHandler) IsLegit() (bool, error) {
 
 	targetCell := grid.CellAtCoordinates(m.action.TargetX, m.action.TargetY)
 
-	return IsInRange(r, STRATEGY_GRID_RANGE) && targetCell.Type == models.CELL_TYPE_WALKABLE, nil
+	if IsInRange(r, STRATEGY_GRID_RANGE) && targetCell.Type == models.CELL_TYPE_WALKABLE {
+		return true, nil
+	}
+
+	return false, errors.New("move - out of range or not walkable")
 }
 
 // ================== AttackActionHandler
@@ -125,7 +130,10 @@ func (a AttackActionHandler) IsLegit() (bool, error) {
 		rangeLimit:      config.RuleAttackRange,
 	}
 
-	return IsInRange(r, STRATEGY_RANGE) && player.HasItem(a.action.Object), nil
+	if IsInRange(r, STRATEGY_RANGE) && player.HasItem(a.action.Object) {
+		return true, nil
+	}
+	return false, errors.New("attack - out of range or do not possess object")
 }
 
 // ================== UsageActionHandler
@@ -163,7 +171,10 @@ func (u UsageActionHandler) IsLegit() (bool, error) {
 		}
 	}
 
-	return hasItem, nil
+	if hasItem {
+		return true, nil
+	}
+	return false, errors.New("use - object not in possession")
 }
 
 // ================== NullActionHandler

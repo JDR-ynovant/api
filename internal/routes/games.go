@@ -23,7 +23,7 @@ func (GamesRouteHandler) Register(app fiber.Router) {
 	gamesApi.Post("/:id/leave", auth.NewAuthRequiredHandler(), handleLeaveGame)
 	gamesApi.Post("/:id/start", auth.NewAuthRequiredHandler(), handleStartGame)
 	gamesApi.Post("/:id/stop", auth.NewAuthRequiredHandler(), handleStopGame)
-	gamesApi.Post("/:id/turn", auth.NewAuthRequiredHandler(), handleNextTurn)
+	gamesApi.Post("/:id/turn", handleNextTurn)
 
 	log.Println("Registered games api group.")
 }
@@ -276,7 +276,7 @@ func BuildFromRequest(turnRequest NewTurnRequest, game models.Game) *models.Turn
 		X:          turnRequest.X,
 		Y:          turnRequest.Y,
 		Player:     turnRequest.Player,
-		TurnNumber: game.TurnNumber + 1,
+		TurnNumber: game.TurnNumber,
 	}
 
 	return &turn
@@ -293,7 +293,6 @@ func BuildFromRequest(turnRequest NewTurnRequest, game models.Game) *models.Turn
 // @Success 200
 // @Router /games/{id}/turn [post]
 func handleNextTurn(c *fiber.Ctx) error {
-	//playerObject := c.Locals(auth.ObjectKey).(*models.User)
 	gr := repository.NewGameRepository()
 	game, err := gr.FindOneById(c.Params("id"))
 	if err != nil {
@@ -314,7 +313,7 @@ func handleNextTurn(c *fiber.Ctx) error {
 	err = engine.PlayTurn(newTurn, game)
 
 	if err != nil {
-		return jsonError(c, fiber.StatusInternalServerError, err.Error())
+		return jsonError(c, fiber.StatusBadRequest, err.Error())
 	}
 
 	err = gr.Update(game.Id.Hex(), *game)

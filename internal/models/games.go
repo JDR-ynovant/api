@@ -8,16 +8,16 @@ import (
 type Game struct {
 	Id             primitive.ObjectID `bson:"_id" json:"id,omitempty"`
 	Name           string             `json:"name,omitempty"`
-	Players        []Character        `json:"players,omitempty"`
-	PlayerCount    int                `json:"playerCount,omitempty"`
+	Players        []Character        `json:"players"`
+	PlayerCount    int                `json:"playerCount"`
 	Playing        primitive.ObjectID `json:"playing,omitempty"`
 	Owner          primitive.ObjectID `json:"owner,omitempty"`
 	Status         GameStatus         `json:"status,omitempty"`
 	Grid           primitive.ObjectID `json:"grid,omitempty"`
-	Objects        []Object           `json:"objects,omitempty"`
+	Objects        []Object           `json:"objects"`
 	ExpiryDate     time.Time          `json:"expiryDate,omitempty"`
-	Turns          []Turn             `json:"turns,omitempty"`
-	TurnNumber     int                `json:"turnNumber,omitempty"`
+	Turns          []Turn             `json:"turns"`
+	TurnNumber     int                `json:"turnNumber"`
 	TurnExpiryDate time.Time          `json:"turnExpiryDate,omitempty"`
 }
 
@@ -29,9 +29,9 @@ const (
 	GAME_STATUS_FINISHED GameStatus = "finished"
 )
 
-func (g Game) GetPlayer(playerId primitive.ObjectID) *Character {
+func (g Game) GetPlayer(userId primitive.ObjectID) *Character {
 	for _, player := range g.Players {
-		if player.Id == playerId {
+		if player.Id == userId {
 			return &player
 		}
 	}
@@ -49,17 +49,17 @@ func (g Game) GetObject(objectID primitive.ObjectID) *Object {
 
 func (g Game) HasPlayer(userId primitive.ObjectID) bool {
 	for _, player := range g.Players {
-		if player.User == userId {
+		if player.Id == userId {
 			return true
 		}
 	}
 	return false
 }
 
-func (g *Game) RemovePlayer(player primitive.ObjectID) {
+func (g *Game) RemovePlayer(userId primitive.ObjectID) {
 	var playerIndex int
 	for i := 0; i < len(g.Players); i++ {
-		if player == g.Players[i].Id {
+		if userId == g.Players[i].Id {
 			playerIndex = i
 		}
 	}

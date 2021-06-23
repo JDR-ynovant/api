@@ -8,9 +8,8 @@ import (
 
 func CreateCharacter(user primitive.ObjectID, name string) *models.Character {
 	character := models.Character{
-		Id:         primitive.NewObjectID(),
+		Id:         user,
 		Name:       name,
-		User:       user,
 		BloodSugar: 0,
 		Inventory:  make([]models.Object, 0),
 		PositionX:  0,

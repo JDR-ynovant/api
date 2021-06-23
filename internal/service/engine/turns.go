@@ -28,11 +28,11 @@ func PlayTurn(turn *models.Turn, game *models.Game) error {
 		TurnNumber: turn.TurnNumber,
 	})
 
-	for _, action := range turn.Actions {
+	for i, action := range turn.Actions {
 		actionHandler := GetActionHandler(game, &action, turn)
 
 		if isLegit, err := actionHandler.IsLegit(); !isLegit {
-			return fmt.Errorf("play turn: action is not legal : %s", err.Error())
+			return fmt.Errorf("play turn: action is not legal : %s (action number: %v)", err, i+1)
 		}
 
 		actionHandler.Handle()
@@ -51,6 +51,7 @@ func PlayTurn(turn *models.Turn, game *models.Game) error {
 
 	// set new playing player
 	game.Playing = calculateNewPlaying(game)
+	game.TurnNumber += 1
 
 	// notify new playing user
 	_ = webpush.SendNotificationToPlayer(*currentUser, notificationStrings.NotificationPlayerTurn)
