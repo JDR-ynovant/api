@@ -54,7 +54,8 @@ func PlayTurn(turn *models.Turn, game *models.Game) error {
 	game.TurnNumber += 1
 
 	// notify new playing user
-	_ = webpush.SendNotificationToPlayer(*currentUser, notificationStrings.NotificationPlayerTurn)
+	newUser, _ := ur.FindOneById(game.Playing.Hex())
+	_ = webpush.SendNotificationToPlayer(*newUser, notificationStrings.NotificationPlayerTurn)
 
 	return nil
 }
