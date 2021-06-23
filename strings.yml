@@ -1,3 +1,4 @@
 notification_player_is_dead: "Oh no.. You have been killed by %s"
 notification_player_turn: "Hey came back, it's your turn to play!"
 notification_player_win: "Victory! You have won the game."
+notification_game_start: "Hey! The game %s has started!"

@@ -2,10 +2,12 @@ package routes
 
 import (
 	"fmt"
+	"github.com/JDR-ynovant/api/internal"
 	"github.com/JDR-ynovant/api/internal/middleware/auth"
 	"github.com/JDR-ynovant/api/internal/models"
 	"github.com/JDR-ynovant/api/internal/repository"
 	"github.com/JDR-ynovant/api/internal/service/engine"
+	"github.com/JDR-ynovant/api/internal/service/webpush"
 	"github.com/go-playground/validator"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -243,6 +245,9 @@ func handleStartGame(c *fiber.Ctx) error {
 		return jsonError(c, fiber.StatusInternalServerError, err.Error())
 	}
 
+	notificationStrings := internal.GetStrings()
+	_ = webpush.SendNotificationToGame(game, fmt.Sprintf(notificationStrings.NotificationGameStart, game.Name))
+
 	return c.SendStatus(fiber.StatusOK)
 }
 
@@ -322,7 +327,7 @@ func handleNextTurn(c *fiber.Ctx) error {
 		return jsonError(c, fiber.StatusInternalServerError, err.Error())
 	}
 
-	return c.SendStatus(fiber.StatusOK)
+	return c.Status(fiber.StatusOK).JSON(*game)
 }
 
 // handleStopGame godoc
