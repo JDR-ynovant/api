@@ -83,9 +83,9 @@ func getDeadPlayersThisTurn(game *models.Game) []primitive.ObjectID {
 	config := internal.GetConfig()
 	deadPlayers := make([]primitive.ObjectID, 0)
 
-	for _, character := range game.Players {
+	for i, character := range game.Players {
 		if character.BloodSugar == -1 {
-			character.BloodSugar = config.RuleBloodSugarCap
+			game.Players[i].BloodSugar = config.RuleBloodSugarCap
 			deadPlayers = append(deadPlayers, character.Id)
 		}
 	}

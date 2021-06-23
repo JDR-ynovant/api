@@ -97,21 +97,23 @@ func (a AttackActionHandler) Handle() {
 	config := internal.GetConfig()
 	target := a.game.GetPlayer(a.action.Character)
 
-	// if object is empty, apply base damage
-	emptyObj := primitive.ObjectID{}
-	if a.action.Object == emptyObj {
-		target.BloodSugar += config.RuleBaseDamage
-	} else {
-		// else apply weapon damage
-		object := a.game.GetObject(a.action.Object)
+	if target.BloodSugar < config.RuleBloodSugarCap {
+		// if object is empty, apply base damage
+		emptyObj := primitive.ObjectID{}
+		if a.action.Object == emptyObj {
+			target.BloodSugar += config.RuleBaseDamage
+		} else {
+			// else apply weapon damage
+			object := a.game.GetObject(a.action.Object)
 
-		if object.Type == models.OBJECT_TYPE_WEAPON {
-			target.BloodSugar += object.Value
+			if object.Type == models.OBJECT_TYPE_WEAPON {
+				target.BloodSugar += object.Value
+			}
 		}
-	}
 
-	if target.BloodSugar >= config.RuleBloodSugarCap {
-		target.BloodSugar = -1
+		if target.BloodSugar >= config.RuleBloodSugarCap {
+			target.BloodSugar = -1
+		}
 	}
 
 	a.game.Turns[a.game.TurnNumber].Actions = append(a.game.Turns[a.game.TurnNumber].Actions, *a.action)
