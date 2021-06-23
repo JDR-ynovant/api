@@ -36,8 +36,6 @@ func PlayTurn(turn *models.Turn, game *models.Game) error {
 		//}
 
 		actionHandler.Handle()
-		//player := game.GetPlayer(game.Playing)
-		//fmt.Printf("play turn: action played: requested position (%v:%v), obtained (%v:%v)", action.TargetX, action.TargetY, player.PositionX, player.PositionY)
 	}
 
 	// fetch dead player this turn for notification

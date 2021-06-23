@@ -30,18 +30,18 @@ const (
 )
 
 func (g Game) GetPlayer(userId primitive.ObjectID) *Character {
-	for _, player := range g.Players {
+	for i, player := range g.Players {
 		if player.Id == userId {
-			return &player
+			return &g.Players[i]
 		}
 	}
 	return nil
 }
 
 func (g Game) GetObject(objectID primitive.ObjectID) *Object {
-	for _, object := range g.Objects {
+	for i, object := range g.Objects {
 		if object.Id == objectID {
-			return &object
+			return &g.Objects[i]
 		}
 	}
 	return nil
