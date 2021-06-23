@@ -10,6 +10,9 @@ type Grid struct {
 }
 
 func (g Grid) CellAtCoordinates(x int, y int) *Cell {
-	cellIndex := x*g.Height + y
-	return &g.Cells[cellIndex]
+	if cellIndex := x*g.Height + y; cellIndex < len(g.Cells) {
+		return &g.Cells[cellIndex]
+	}
+
+	return nil
 }

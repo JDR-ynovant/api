@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-type testObjectsStruct struct {
+type gridStrategyTestObjectsStruct struct {
 	r RangeCalculation
 	s Strategy
 }
@@ -27,7 +27,7 @@ func TestNaiveRangeStrategyHandler_PositionIsInRange(t *testing.T) {
 		},
 	}
 
-	testObjects := []testObjectsStruct{
+	testObjects := []gridStrategyTestObjectsStruct{
 		{
 			r: RangeCalculation{
 				grid: &models.Grid{
@@ -120,7 +120,7 @@ func TestGridRangeStrategyHandler_PositionIsInRange(t *testing.T) {
 		},
 	}
 
-	testObjects := []testObjectsStruct{
+	testObjects := []gridStrategyTestObjectsStruct{
 		{
 			r: RangeCalculation{
 				grid: &models.Grid{
@@ -185,6 +185,22 @@ func TestGridRangeStrategyHandler_PositionIsInRange(t *testing.T) {
 			},
 			s: STRATEGY_RANGE,
 		},
+		{
+			r: RangeCalculation{
+				grid: &models.Grid{
+					Id:     primitive.ObjectID{},
+					Width:  5,
+					Height: 5,
+					Cells:  generateFromGridPattern(gridPattern[0]),
+				},
+				basePositionX:   2,
+				basePositionY:   2,
+				targetPositionX: 1,
+				targetPositionY: 4,
+				rangeLimit:      2,
+			},
+			s: STRATEGY_RANGE,
+		},
 	}
 
 	expectedOutput := []bool{
@@ -192,6 +208,7 @@ func TestGridRangeStrategyHandler_PositionIsInRange(t *testing.T) {
 		true,
 		false,
 		false,
+		true,
 	}
 
 	for i, testObject := range testObjects {
@@ -209,7 +226,7 @@ func generateFromGridPattern(pattern [][]int) []models.Cell {
 			var cellType models.CellType
 			if yValue == Walkable {
 				cellType = models.CELL_TYPE_WALKABLE
-			} else {
+			} else if yValue == Obstacle {
 				cellType = models.CELL_TYPE_OBSTACLE
 			}
 

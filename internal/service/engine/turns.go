@@ -28,8 +28,11 @@ func PlayTurn(turn *models.Turn, game *models.Game) error {
 		TurnNumber: turn.TurnNumber,
 	})
 
+	gr := repository.NewGridRepository()
+	grid, _ := gr.FindOneById(game.Grid.Hex())
+
 	for _, action := range turn.Actions {
-		actionHandler := GetActionHandler(game, &action, turn)
+		actionHandler := GetActionHandler(game, grid, &action, turn)
 
 		//if isLegit, err := actionHandler.IsLegit(); !isLegit {
 		//	return fmt.Errorf("play turn: action is not legal : %s (action number: %v)", err, i+1)

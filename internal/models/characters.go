@@ -19,5 +19,5 @@ func (c Character) HasItem(id primitive.ObjectID) bool {
 		}
 	}
 
-	return hasItem
+	return hasItem || id == primitive.ObjectID{}
 }
