@@ -101,7 +101,7 @@ func handleCreateGame(c *fiber.Ctx) error {
 		return jsonError(c, fiber.StatusInternalServerError, err.Error())
 	}
 
-	err = gr.AttachUser(owner.Id.Hex(), createdGame.Id.Hex())
+	err = gr.AttachUser(owner.Id.Hex(), models.MetaFromGame(*game))
 	if err != nil {
 		return jsonError(c, fiber.StatusInternalServerError, err.Error())
 	}
@@ -142,7 +142,7 @@ func handleJoinGame(c *fiber.Ctx) error {
 		}
 
 		ur := repository.NewUserRepository()
-		playerObject.Games = append(playerObject.Games, game.Id)
+		playerObject.Games = append(playerObject.Games, models.MetaFromGame(*game))
 		err = ur.Update(playerObject.Id.Hex(), *playerObject)
 		if err != nil {
 			return jsonError(c, fiber.StatusBadRequest, err.Error())
@@ -226,8 +226,7 @@ func handleStartGame(c *fiber.Ctx) error {
 
 	grr := repository.NewGridRepository()
 	grid := engine.GenerateGrid(engine.DEFAULT_GRID_WIDTH, engine.DEFAULT_GRID_HEIGHT)
-	err = grr.Create(grid)
-	if err != nil {
+	if err = grr.Create(grid); err != nil {
 		return jsonError(c, fiber.StatusInternalServerError, err.Error())
 	}
 
@@ -240,8 +239,11 @@ func handleStartGame(c *fiber.Ctx) error {
 	game.Grid = grid.Id
 	game.Status = models.GAME_STATUS_STARTED
 
-	err = gr.Update(gameId, *game)
-	if err != nil {
+	if err = gr.Update(gameId, *game); err != nil {
+		return jsonError(c, fiber.StatusInternalServerError, err.Error())
+	}
+
+	if err = gr.SynchronizeGameStatus(game); err != nil {
 		return jsonError(c, fiber.StatusInternalServerError, err.Error())
 	}
 
@@ -309,22 +311,23 @@ func handleNextTurn(c *fiber.Ctx) error {
 		return jsonError(c, fiber.StatusInternalServerError, err.Error())
 	}
 
-	validationErrors := ValidateNewTurnRequest(*newTurnRequest)
-	if validationErrors != nil {
+	if validationErrors := ValidateNewTurnRequest(*newTurnRequest); validationErrors != nil {
 		return jsonError(c, fiber.StatusBadRequest, validationErrors)
 	}
 
 	newTurn := BuildFromRequest(*newTurnRequest, *game)
-	err = engine.PlayTurn(newTurn, game)
-
-	if err != nil {
+	if err = engine.PlayTurn(newTurn, game); err != nil {
 		return jsonError(c, fiber.StatusBadRequest, err.Error())
 	}
 
-	err = gr.Update(game.Id.Hex(), *game)
-
-	if err != nil {
+	if err = gr.Update(game.Id.Hex(), *game); err != nil {
 		return jsonError(c, fiber.StatusInternalServerError, err.Error())
+	}
+
+	if game.Status == models.GAME_STATUS_FINISHED {
+		if err = gr.SynchronizeGameStatus(game); err != nil {
+			return jsonError(c, fiber.StatusInternalServerError, err.Error())
+		}
 	}
 
 	return c.Status(fiber.StatusOK).JSON(*game)
@@ -358,8 +361,11 @@ func handleStopGame(c *fiber.Ctx) error {
 	}
 
 	game.Status = models.GAME_STATUS_FINISHED
-	err = gr.Update(gameId, *game)
-	if err != nil {
+	if err = gr.Update(gameId, *game); err != nil {
+		return jsonError(c, fiber.StatusInternalServerError, err.Error())
+	}
+
+	if err := gr.SynchronizeGameStatus(game); err != nil {
 		return jsonError(c, fiber.StatusInternalServerError, err.Error())
 	}
 

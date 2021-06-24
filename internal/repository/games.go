@@ -114,19 +114,33 @@ func (gr GameRepository) Delete(id string) error {
 	return err
 }
 
-func (gr GameRepository) AttachUser(userID string, gameID string) error {
+func (gr GameRepository) AttachUser(userID string, game models.MetaGame) error {
 	ur := NewUserRepository()
 	user, err := ur.FindOneById(userID)
 	if err != nil {
 		return err
 	}
 
-	if !user.HasGameAttached(gameID) {
-		gameIDPrimitive, _ := primitive.ObjectIDFromHex(gameID)
-		user.Games = append(user.Games, gameIDPrimitive)
+	if !user.HasGameAttached(game.Id.Hex()) {
+		user.Games = append(user.Games, game)
 
 		err = ur.Update(userID, *user)
 	}
 
 	return err
+}
+
+func (gr GameRepository) SynchronizeGameStatus(game *models.Game) error {
+	ur := NewUserRepository()
+	for _, player := range game.Players {
+		user, _ := ur.FindOneById(player.Id.Hex())
+		metaGame := user.GetGame(game.Id)
+		metaGame.Status = game.Status
+
+		err := ur.Update(user.Id.Hex(), *user)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

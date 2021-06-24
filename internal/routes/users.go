@@ -5,7 +5,6 @@ import (
 	"github.com/JDR-ynovant/api/internal/repository"
 	"github.com/go-playground/validator"
 	"github.com/gofiber/fiber/v2"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"log"
 )
 
@@ -104,7 +103,7 @@ func createUser(c *fiber.Ctx) error {
 
 	user := models.User{
 		Name:  createUserRequest.Name,
-		Games: make([]primitive.ObjectID, 0),
+		Games: make([]models.MetaGame, 0),
 	}
 
 	u, err := ur.Create(&user)
